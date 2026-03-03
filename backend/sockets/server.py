@@ -6,7 +6,7 @@ import string
 from backend.game import Game
 from backend.sockets.runner import Engine
 
-rooms = {} #ket = roomid, value = Game
+rooms = {} #key = roomid, value = Game
 clients = {} # key = playerid, value = websocket
 
 

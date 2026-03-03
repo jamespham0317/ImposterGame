@@ -15,7 +15,10 @@ const GameContext = createContext({
     problemCode: "",
     problemTests: [1, 2, 3],
     code: "",
-    commits: []
+    commits: [],
+    votes: [],
+    voted: "",
+    votedCorrectly: false,
 });
 
 export function GameProvider({ children }: { children: React.ReactNode }) {
@@ -37,6 +40,9 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
     const [code, setCode] = useState("");
 
     const [commits, setCommits] = useState([]);
+    const [votes, setVotes] = useState([]);
+    const [voted, setVoted] = useState("");
+    const [votedCorrectly, setVotedCorrectly] = useState(false);
 
     const value = {
         gameState,
@@ -53,7 +59,10 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
         problemCode,
         problemTests,
         code,
-        commits
+        commits,
+        votes,
+        voted,
+        votedCorrectly,
     }
 
     return (
