@@ -32,7 +32,7 @@ export default function VersionPanel() {
                         <div className="flex flex-col items-center ">
                             {commits.map((commit, index) => (
                                 <div key={index}>
-                                    <CommitCard index={index} username={commit[0]} isFirst={index === 0} isLast={index === commits.length - 1} highlight={index === highlightedCommit} handleCommitClick={handleCommitClick} />
+                                    <CommitCard index={index} username={commit.player_id} isFirst={index === 0} isLast={index === commits.length - 1} highlight={index === highlightedCommit} handleCommitClick={handleCommitClick} />
                                 </div>
                             ))}
                         </div>
@@ -43,7 +43,7 @@ export default function VersionPanel() {
                             height="600px"
                             width="60%"
                             defaultLanguage="python"
-                            value={commits?.[highlightedCommit][1]}
+                            value={commits?.[highlightedCommit]?.code}
                             theme="vs-dark"
                             options={{
                                 readOnly: true

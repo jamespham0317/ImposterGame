@@ -7,18 +7,38 @@ import ConsolePanel from "./ConsolePanel.tsx";
 import { useRoom } from "../contexts/RoomContext.tsx";
 import { useGame } from "../contexts/GameContext.tsx";
 import { useState } from "react";
+import { useSocket } from "../contexts/SocketContext.tsx";
 
 export default function EditorPanel() {
-    const { username } = useRoom();
-    const { currentPlayer, code } = useGame();
+    const { send, isConnected } = useSocket();
+    const { username, roomId } = useRoom();
+    const { currentPlayer, code, setCode } = useGame();
 
     const [isConsoleOpen, setIsConsoleOpen] = useState(false);
     const [editorHeight, setEditorHeight] = useState(600);
-    const [consoleHeight, setConsoleHeight] = useState(200);
+    const [consoleHeight, setConsoleHeight] = useState(0);
 
-    const handleEditorChange = () => { };
+    const handleEditorChange = (code: string | undefined) => {
+        if (code !== undefined) {
+            setCode(code);
+        }
+    };
 
-    const runCode = () => { };
+    const runCode = () => {
+        if (!isConnected) {
+            console.error("Socket not connected");
+            return;
+        }
+
+        const request = {
+            type: "run-test-cycle",
+            roomId: roomId,
+            playerId: username,
+            code: code
+        }
+
+        send(request);
+    };
 
     const toggleConsole = () => {
         if (!isConsoleOpen) {
@@ -52,12 +72,10 @@ export default function EditorPanel() {
                             value={code}
                             onChange={handleEditorChange}
                         />
-                        {isConsoleOpen && (
-                            <ConsolePanel
-                                height={consoleHeight}
-                                onResize={handleConsoleResize}
-                            />
-                        )}
+                        <ConsolePanel
+                            height={consoleHeight}
+                            onResize={handleConsoleResize}
+                        />
                         <div className="flex justify-between border-t-2 border-gray-700">
                             <div
                                 className="text-gray-400 m-3 p-1 rounded-xl cursor-pointer hover:bg-gray-800"

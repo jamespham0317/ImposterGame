@@ -13,17 +13,17 @@ export default function CreateForm({ onCancelCreateClick }: CreateFormProps) {
   const [username, setUsername] = useState("");
 
   useEffect(() => {
-    const unsubRoom = onMessage("room-created", (data) => {
+    const unsubRoomCreate = onMessage("room-created", (data) => {
       navigate("/Lobby", {
         state: {
           roomId: data.roomId,
-          username: username,
-          players: [username],
+          username: data.playerId,
+          players: [data.playerId],
         },
       });
     });
 
-    return () => unsubRoom();
+    return () => unsubRoomCreate();
   }, [onMessage, navigate, username]);
 
   function onCreateClick() {
@@ -48,7 +48,7 @@ export default function CreateForm({ onCancelCreateClick }: CreateFormProps) {
   return (
     <>
       <div className="fixed inset-0 bg-black/50 z-50 flex justify-center items-center">
-        <form className="bg-gray-900 rounded-lg border border-gray-700 w-100 h-50">
+        <form className="bg-gray-900 rounded-lg border border-gray-700 w-100 h-50" autoComplete="off">
           <h1 className="text-white text-l font-bold m-5">Create Room</h1>
 
           <div className="flex flex-col m-5">

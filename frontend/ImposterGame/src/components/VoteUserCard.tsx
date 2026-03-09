@@ -2,11 +2,12 @@ import { User } from "lucide-react";
 
 type VoteUserCardProps = {
     username: string;
-    highlight: boolean
+    votes: number;
+    highlight: boolean;
     handleCardClick: (username: string) => void;
 }
 
-export default function UserCard({ username, highlight, handleCardClick }: VoteUserCardProps) {
+export default function UserCard({ username, votes, highlight, handleCardClick }: VoteUserCardProps) {
     return (
         <>
             <div
@@ -18,7 +19,7 @@ export default function UserCard({ username, highlight, handleCardClick }: VoteU
                 {username}
 
                 <div className="ml-auto w-6 h-6 flex items-center justify-center rounded-full border-2 border-gray-200 text-xs">
-                    0
+                    {votes}
                 </div>
             </div>
         </>

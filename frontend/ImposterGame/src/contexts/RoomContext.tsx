@@ -29,14 +29,13 @@ export default function RoomProvider({ children }: RoomProviderProps) {
     const [username, setUsername] = useState("");
     const [players, setPlayers] = useState<string[]>([]);
 
-    // Listen only to room-related messages
     useEffect(() => {
-        const unsubRoom = onMessage("player-joined", (data) => {
+        const unsubRoomJoin = onMessage("player-joined", (data) => {
             setPlayers(data.playerList);
         });
 
         return () => {
-            unsubRoom();
+            unsubRoomJoin();
         };
     }, [onMessage]);
 

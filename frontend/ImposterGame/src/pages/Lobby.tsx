@@ -1,9 +1,10 @@
 import { useEffect } from "react";
-import { useLocation } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import LobbyUserCard from "../components/LobbyUserCard.tsx";
 
 import { useRoom } from "../contexts/RoomContext.tsx";
 import { useGame } from "../contexts/GameContext.tsx";
+import { useSocket } from "../contexts/SocketContext.tsx";
 
 type LobbyLocationState = {
   roomId: string;
@@ -12,13 +13,32 @@ type LobbyLocationState = {
 };
 
 export default function Lobby() {
-  const { roomId, players, setRoomId, setUsername, setPlayers } = useRoom();
+  const { send, onMessage, isConnected } = useSocket();
+  const { roomId, setRoomId, username, setUsername, players, setPlayers } = useRoom();
+  const navigate = useNavigate();
   const location = useLocation();
   const navState = location.state as LobbyLocationState;
 
   const {
 
   } = useGame();
+
+  useEffect(() => {
+    const unsubGameStart = onMessage("game-started", (data) => {
+      navigate("/Game", {
+        state: {
+          players: data.playerList,
+          currentPlayer: data.playerList[0],
+          imposter: data.imposterId,
+          problem: data.problem,
+          testCycle: data.testCycle,
+          code: data.problem["code"]
+        },
+      });
+    });
+
+    return () => unsubGameStart();
+  }, [onMessage]);
 
   useEffect(() => {
     setRoomId(navState.roomId);
@@ -28,11 +48,20 @@ export default function Lobby() {
   }, [navState]);
 
   async function copyCode() {
-
+    await navigator.clipboard.writeText(roomId);
   }
 
   async function startGame() {
+    if (!isConnected) {
+      console.error("Socket not connected");
+      return;
+    }
+    const request = {
+      type: "start-game",
+      roomId: roomId,
+    };
 
+    send(request);
   }
 
   return (
@@ -53,7 +82,7 @@ export default function Lobby() {
             </h1>
             {players.map((player) => (
               <div key={player}>
-                <LobbyUserCard username={player} />
+                <LobbyUserCard username={player} highlight={player === username} />
               </div>
             ))}
           </div>

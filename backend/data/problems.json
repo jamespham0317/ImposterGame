@@ -17,7 +17,7 @@
                 "Only one valid answer exists."
             ],
             "topics": [
-                "Array"
+                "Arrays & Hashing"
             ],
             "code": "def twoSum(nums, target):\n    # Write your solution here\n    pass",
             "testCycle": [

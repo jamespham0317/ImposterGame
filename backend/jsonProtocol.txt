@@ -35,6 +35,15 @@ Frontend -> Backend:
         passedList
     Response: start-vote # if all tests passed
         commits
+        votes
+
+    Request: next-turn
+        roomId
+        playerId
+        code
+    Response: next-turn
+        currentPlayer
+        code
 
     Request: cast-vote
         roomId
@@ -49,15 +58,7 @@ Backend -> Frontend
     Message: time-left
         timeLeft
 
-    Request: next-turn
-    Response: next-turn
-        roomId
-        playerId
-        code
-
-    Message: switch-current-player
-        currentPlayer
-        code
+    Message: turn-over
 
     Message: vote-over
         votedList

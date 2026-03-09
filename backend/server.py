@@ -100,13 +100,13 @@ async def handler(websocket):
                     "type": "game-started",
                     "playerList": game.get_player_ids(),
                     "imposterId": game.get_imposter_id(),
-                    "problem": json.dumps(problem),
-                    "testCycle": json.dumps(test_cycle)
+                    "problem": problem,
+                    "testCycle": test_cycle
                 }
 
                 await room.broadcast(response)
 
-                game.timer_task = asyncio.create_task(game.start_timer(120))
+                game.timer_task = asyncio.create_task(game.start_timer(30))
             
             elif msg_type == "run-test-cycle":
                 try:
@@ -143,11 +143,12 @@ async def handler(websocket):
 
                     await websocket.send(json.dumps(response))
                 else:
-                    game.set_voting(player_id, code)
+                    await game.set_voting(player_id, code)
                     
                     response = {
                         "type": "start-vote",
-                        "commits": game.get_commits()
+                        "commits": game.get_commits(),
+                        "votes": game.get_votes()
                     }
 
                     await room.broadcast(response)
@@ -203,10 +204,10 @@ async def handler(websocket):
                     await websocket.send("Coding not in progress")
                     continue
 
-                game.next_turn(player_id, code)
+                await game.next_turn(player_id, code)
 
                 response = {
-                    "type": "switch-current-player",
+                    "type": "next-turn",
                     "currentPlayer": game.players[game.current_player_idx].id,
                     "code": code
                 }

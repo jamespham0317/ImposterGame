@@ -140,7 +140,7 @@ class Game:
                 current_player = self.players[self.current_player_idx]
                 websocket = current_player.websocket
                 await websocket.send(json.dumps({
-                    "type": "next-turn"
+                    "type": "turn-over"
                 }))
             elif self.state == GameState.VOTING:
                 self.set_results()
@@ -148,28 +148,29 @@ class Game:
                 response = {
                     "type": "vote-over",
                     "voted": self.get_voted(),
-                    "votedCorrectly": self.get_imposter_id() in voted
+                    "votedCorrectly": self.get_imposter_id() in self.get_voted()
                 }
                 await self.room.broadcast(response)
         except asyncio.CancelledError:
             pass
 
-    def next_turn(self, player_id, code):
+    async def next_turn(self, player_id, code):
         self.add_commit(player_id, code)
         self.current_player_idx = (self.current_player_idx + 1) % len(self.players)
-        asyncio.create_task(self.stop_timer())
-        self.timer_task = asyncio.create_task(self.start_timer(120))
+        await asyncio.create_task(self.stop_timer())
+        self.timer_task = asyncio.create_task(self.start_timer(30))
+        
     
     def get_voted(self):
         max_votes = max(player.votes for player in self.players)
         candidates = [player for player in self.players if player.votes == max_votes]
         return [candidate.id for candidate in candidates]
 
-    def set_voting(self, player_id, code):
+    async def set_voting(self, player_id, code):
         self.state = GameState.VOTING
         self.add_commit(player_id, code)
-        asyncio.create_task(self.stop_timer())
-        self.timer_task = asyncio.create_task(self.start_timer(300))
+        await asyncio.create_task(self.stop_timer())
+        self.timer_task = asyncio.create_task(self.start_timer(10))
 
     def set_results(self):
         self.state = GameState.RESULTS

@@ -2,14 +2,20 @@ import VoteUserCard from "./VoteUserCard.tsx";
 
 import { useState } from "react";
 
+import { useSocket } from "../contexts/SocketContext.tsx";
 import { useGame } from "../contexts/GameContext.tsx";
+import { useRoom } from "../contexts/RoomContext.tsx";
 
 export default function VoteBar() {
+    const { send, isConnected } = useSocket();
+    const { roomId, username } = useRoom();
+    const [voted, setVoted] = useState(false);
     const [highlightedCard, setHighlightedCard] = useState("");
 
     const {
         time,
-        players
+        players,
+        votes
     } = useGame();
 
     const handleCardClick = (username: string) => {
@@ -17,7 +23,18 @@ export default function VoteBar() {
     };
 
     const castVote = () => {
-        // Add logic to cast vote here
+        if (!isConnected) {
+            console.error("Socket not connected");
+            return;
+        }
+
+        const request = {
+            type: "cast-vote",
+            roomId: roomId,
+            playerId: highlightedCard
+        };
+        send(request);
+        setVoted(true);
     };
 
     return (
@@ -33,14 +50,15 @@ export default function VoteBar() {
                     </div>
                     {players.map((player) => (
                         <div key={player}>
-                            <VoteUserCard username={player} highlight={player === highlightedCard} handleCardClick={handleCardClick} />
+                            <VoteUserCard username={player} votes={votes?.[player] ?? 0} highlight={player === highlightedCard} handleCardClick={handleCardClick} />
                         </div>
                     ))}
                 </div>
                 <div className="flex justify-end">
                     <button
                         onClick={castVote}
-                        className="cursor-pointer w-20 m-2 mt-60 p-3 rounded-xl font-bold text-sm text-gray-200 bg-purple-800 hover:bg-purple-700 transition-colors duration-300"
+                        className="cursor-pointer w-20 m-2 mt-60 p-3 rounded-xl font-bold text-sm text-gray-200 bg-purple-800 hover:bg-purple-700 transition-colors duration-300 disabled:bg-gray-700 disabled:cursor-not-allowed"
+                        disabled={voted || highlightedCard === ""}
                     >
                         Vote
                     </button>
