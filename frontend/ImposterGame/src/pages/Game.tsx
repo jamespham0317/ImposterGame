@@ -48,33 +48,49 @@ export default function Game() {
 
     }, [navState]);
 
+    const phaseLabel = gameState === GameState.Coding
+        ? "Coding"
+        : gameState === GameState.Voting
+            ? "Voting"
+            : "Results";
+
     return (
         <>
             <div className="flex h-screen flex-col bg-brand-black">
-                <div className="flex">
-                    <h1 className="text-purple-700 text-xl font-bold m-5">
-                        Cheet
-                        <strong className="text-white">Code</strong>
-                    </h1>
+                <div className="px-5 pt-5 pb-3">
+                    <div className="flex items-center justify-between">
+                        <h1 className="text-2xl font-extrabold tracking-tight">
+                            <span className="text-purple-500">Cheet</span>
+                            <span className="text-white">Code</span>
+                        </h1>
+                        <span className="rounded-full border border-gray-700 bg-brand-gray px-3 py-1 text-xs font-semibold uppercase tracking-widest text-gray-300">
+                            {phaseLabel}
+                        </span>
+                    </div>
                 </div>
-                {gameState === GameState.Coding &&
-                    (<div className="flex min-h-0 flex-1 items-stretch">
-                        <SideBar />
-                        <ProblemPanel />
-                        <EditorPanel />
-                    </div>)}
-                {gameState === GameState.Voting &&
-                    (<div className="flex min-h-0 flex-1 items-stretch">
-                        <VoteSideBar voting={true} />
-                        <ProblemPanel />
-                        <CommitPanel />
-                    </div>)}
-                {gameState === GameState.Results &&
-                    (<div className="flex min-h-0 flex-1 items-stretch">
-                        <VoteSideBar voting={false} />
-                        <ResultsPanel />
-                        <CommitPanel />
-                    </div>)}
+
+                <div className="min-h-0 flex-1 px-3 pb-3">
+                    <div className="flex min-h-0 h-full items-stretch gap-2 rounded-2xl border border-gray-800 bg-gradient-to-b from-brand-black via-brand-black to-[#13131b]/60 p-1.5">
+                        {gameState === GameState.Coding &&
+                            (<div className="flex min-h-0 flex-1 items-stretch gap-2">
+                                <SideBar />
+                                <ProblemPanel />
+                                <EditorPanel />
+                            </div>)}
+                        {gameState === GameState.Voting &&
+                            (<div className="flex min-h-0 flex-1 items-stretch gap-2">
+                                <VoteSideBar voting={true} />
+                                <ProblemPanel />
+                                <CommitPanel />
+                            </div>)}
+                        {gameState === GameState.Results &&
+                            (<div className="flex min-h-0 flex-1 items-stretch gap-2">
+                                <VoteSideBar voting={false} />
+                                <ResultsPanel />
+                                <CommitPanel />
+                            </div>)}
+                    </div>
+                </div>
             </div >
         </>
     );

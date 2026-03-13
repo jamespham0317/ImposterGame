@@ -37,7 +37,7 @@ export default function RoomProvider({ children }: RoomProviderProps) {
     const [players, setPlayers] = useState<string[]>([]);
 
     useEffect(() => {
-        const unsubRoomJoin = onMessage("players-update", (data) => {
+        const unsubRoomJoin = onMessage("room-players-update", (data) => {
             setPlayers(data.playerList);
         });
 

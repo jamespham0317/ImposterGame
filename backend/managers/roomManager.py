@@ -28,3 +28,7 @@ class RoomManager:
     
     def room_exists(self, room_id):
         return room_id in self.rooms
+
+    def remove_room(self, room_id):
+        if self.room_exists(room_id):
+            del self.rooms[room_id]

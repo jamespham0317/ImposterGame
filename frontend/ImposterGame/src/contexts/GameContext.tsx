@@ -102,7 +102,7 @@ export default function GameProvider({ children }: GameProviderProps) {
         const unsubTimeLeft = onMessage("time-left", (data) => {
             setTime(data.timeLeft);
         });
-        const unsubTurnOver = onMessage("turn-over", (data) => {
+        const unsubTurnOver = onMessage("turn-over", () => {
             const response = {
                 type: "next-turn",
                 roomId: roomId,
@@ -114,6 +114,7 @@ export default function GameProvider({ children }: GameProviderProps) {
         const unsubNextTurn = onMessage("next-turn", (data) => {
             setCurrentPlayer(data.currentPlayer);
             setCode(data.code);
+            setChat(data.chat);
         });
         const unsubChatUpdate = onMessage("chat-update", (data) => {
             setChat(data.chat);
@@ -121,14 +122,21 @@ export default function GameProvider({ children }: GameProviderProps) {
         const unsubStartVote = onMessage("start-vote", (data) => {
             setGameState(GameState.Voting);
             setCommits(data.commits);
+            setChat(data.chat);
         });
         const unsubVoteCasted = onMessage("vote-casted", (data) => {
             setVotes(data.voteList);
+            setChat(data.chat);
         });
         const unsubVoteOver = onMessage("vote-over", (data) => {
             setGameState(GameState.Results);
             setVoted(data.voted);
             setVotedCorrectly(data.votedCorrectly);
+        });
+        const unsubPlayersUpdate = onMessage("game-players-update", (data) => {
+            setPlayers(data.playerList);
+            setCurrentPlayer(data.currentPlayer);
+            setChat(data.chat);
         });
         return () => {
             unsubTimeLeft();
@@ -138,8 +146,9 @@ export default function GameProvider({ children }: GameProviderProps) {
             unsubStartVote();
             unsubVoteCasted();
             unsubVoteOver();
+            unsubPlayersUpdate();
         };
-    }, [onMessage, code]);
+    }, [onMessage, send, roomId, username, code]);
 
     const value = {
         gameState,

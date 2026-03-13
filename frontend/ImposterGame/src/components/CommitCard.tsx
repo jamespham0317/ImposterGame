@@ -12,25 +12,28 @@ type CommitCardProps = {
 export default function CommitCard({ index, username, isFirst, isLast, selected, handleCommitClick }: CommitCardProps) {
     return (
         <>
-            <div
+            <button
+                type="button"
                 onClick={() => handleCommitClick(index)}
-                className={`flex w-full items-center h-15 border-x-2 border-t-2 border-gray-700 text-sm cursor-pointer transition-colors duration-300
-                    ${selected ? "bg-purple-700" : "bg-brand-gray"}
-                    ${selected ? "hover:bg-purple-600" : "hover:bg-brand-gray-light"}
-                    ${isFirst ? "rounded-t-md" : "rounded-t-none"}
-                    ${isLast ? "rounded-b-md" : "rounded-b-none"}
-                    ${isLast ? "border-b-2" : "border-b-none"}`}
+                className={`w-full text-left border border-gray-700 cursor-pointer transition-all duration-200 px-3 py-3
+                    ${selected ? "bg-purple-700/30 border-purple-500/40" : "bg-brand-gray-light/40 hover:bg-brand-gray-light border-gray-700"}
+                    ${isFirst ? "rounded-t-xl" : "rounded-t-none"}
+                    ${isLast ? "rounded-b-xl" : "rounded-b-none"}`}
             >
-                <div className="m-2 text-gray-300">
-                    <div className="flex">
-                        <File size={16} className="mr-2" />
-                        {username}
+                <div className="flex items-start gap-2">
+                    <div className={`mt-0.5 ${selected ? "text-purple-200" : "text-gray-400"}`}>
+                        <File size={16} />
                     </div>
-                    <div className="text-xs text-gray-400">
-                        Commit #{index + 1}
+                    <div className="min-w-0">
+                        <p className={`text-sm font-semibold truncate ${selected ? "text-white" : "text-gray-200"}`}>
+                            {username}
+                        </p>
+                        <p className={`text-xs ${selected ? "text-purple-200" : "text-gray-500"}`}>
+                            Commit #{index + 1}
+                        </p>
                     </div>
                 </div>
-            </div>
+            </button>
         </>
     );
 }

@@ -14,7 +14,7 @@ class Room:
         self.players.append(player)
 
     def remove_player(self, player_id):
-        self.players = [player for player in self.players if player.id != player_id]
+        self.players[:] = [player for player in self.players if player.id != player_id]
 
     def create_game(self):
         self.game = Game(self.players, self)
@@ -39,4 +39,4 @@ class Room:
         await asyncio.gather(*[
             player.websocket.send(json.dumps(message))
             for player in self.players
-        ])
+        ], return_exceptions=True)

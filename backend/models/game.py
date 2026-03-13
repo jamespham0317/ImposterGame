@@ -126,6 +126,7 @@ class Game:
             return [None] * len(self.test_cycle), [False] * len(self.test_cycle), False
 
     def cast_vote(self, player_id):
+        self.addMessage("System", f"{self.players[self.current_player_idx].id} has cast their vote.", time.time())
         for player in self.players:
             if player.id == player_id:
                 player.add_vote()
@@ -164,20 +165,56 @@ class Game:
             pass
 
     async def next_turn(self, player_id, code):
+        if len(self.players) == 0:
+            return
         self.add_commit(player_id, code)
         self.current_player_idx = (self.current_player_idx + 1) % len(self.players)
+        self.addMessage("System", f"{self.players[self.current_player_idx].id}'s turn to code.", time.time())
         await asyncio.create_task(self.stop_timer())
         self.timer_task = asyncio.create_task(self.start_timer(30))
         
     
     def get_voted(self):
+        if len(self.players) == 0:
+            return []
         max_votes = max(player.votes for player in self.players)
+        if max_votes == 0:
+            return []
         candidates = [player for player in self.players if player.votes == max_votes]
         return [candidate.id for candidate in candidates]
+
+    async def handle_player_disconnect(self, player_id):
+        disconnected_index = next((i for i, player in enumerate(self.players) if player.id == player_id), -1)
+        if disconnected_index == -1:
+            return
+
+        was_current_player = disconnected_index == self.current_player_idx
+
+        self.players.pop(disconnected_index)
+        self.addMessage("System", f"{player_id} disconnected.", time.time())
+
+        if len(self.players) == 0:
+            await self.stop_timer()
+            return
+
+        if disconnected_index < self.current_player_idx:
+            self.current_player_idx -= 1
+
+        if was_current_player:
+            self.current_player_idx = self.current_player_idx % len(self.players)
+
+        if self.state == GameState.CODING and was_current_player:
+            self.addMessage("System", f"{self.players[self.current_player_idx].id}'s turn to code.", time.time())
+            await self.stop_timer()
+            self.timer_task = asyncio.create_task(self.start_timer(30))
+
+        if self.state == GameState.VOTING and self.get_number_of_votes() >= len(self.players):
+            await self.set_results()
 
     async def set_voting(self, player_id, code):
         self.state = GameState.VOTING
         self.add_commit(player_id, code)
+        self.addMessage("System", "Voting has begun. Vote for the imposter!", time.time())
         await asyncio.create_task(self.stop_timer())
         self.timer_task = asyncio.create_task(self.start_timer(120))
 
@@ -187,7 +224,7 @@ class Game:
         response = {
             "type": "vote-over",
             "voted": self.get_voted(),
-            "votedCorrectly": self.get_imposter_id() in self.get_voted()
+            "votedCorrectly": self.get_imposter_id() in self.get_voted(),
         }
         await self.room.broadcast(response)
 

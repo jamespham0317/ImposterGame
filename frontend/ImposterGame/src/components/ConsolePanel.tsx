@@ -80,50 +80,60 @@ export default function ConsolePanel({ height, isOpen, onResize }: ConsolePanelP
     return (
         <>
             <div
-                className={`bg-brand-gray text-gray-200 border-gray-700 overflow-y-auto custom-scrollbar ${isOpen ? "border-t-2" : "border-0"}`}
+                className={`bg-brand-gray text-gray-200 border-gray-700 overflow-y-auto custom-scrollbar ${isOpen ? "border-t" : "border-0"}`}
                 style={{ height: `${height}vh` }}
             >
                 <div
-                    className="flex justify-center cursor-row-resize h-1"
+                    className="flex items-center justify-center cursor-row-resize h-5 text-gray-500 hover:text-gray-300 transition-colors duration-200"
                     onMouseDown={handleMouseDown}
                     onMouseUp={handleMouseUp}
                 >
-                    <GripHorizontal />
+                    <GripHorizontal size={16} />
                 </div>
-                <div className="mt-5 mx-5 text-gray-200 text-xl font-bold">
-                    Test Cases
-                </div>
-                <div className="flex">
-                    {testCycle.map((_, index) => (
-                        <div key={index}>
-                            {passed.length > 0 ?
-                                <TestCard index={index} passed={passed[index]} highlight={index === highlightedCard} handleCardClick={handleCardClick} /> :
-                                <TestCard index={index} highlight={index === highlightedCard} handleCardClick={handleCardClick} />}
+                <div className="px-4 pb-4 space-y-4">
+                    <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                            <div className="w-1 h-5 bg-purple-600 rounded-full" />
+                            <h3 className="text-sm font-bold uppercase tracking-widest text-gray-100">Test Console</h3>
                         </div>
-                    ))}
-                </div>
-                <div className="m-5">
-                    <strong className="text-gray-300">Input:</strong>
-                    <div className="bg-brand-gray-light text-gray-400 p-3 rounded-xl mt-2 h-auto min-h-10 font-mono text-sm">
-                        {Object.entries(testCycle[highlightedCard].input)
-                            .map(([key, value]) => `${key}: ${JSON.stringify(value, null, 2)}`)
-                            .join(", ")}
+                        <span className={`text-xs font-semibold rounded-full px-2.5 py-1 ${error ? "bg-red-500/10 text-red-400" : passed.length > 0 ? "bg-green-500/10 text-green-400" : "bg-gray-800 text-gray-400"}`}>
+                            {error ? "Runtime Error" : passed.length > 0 ? `${passed.filter(Boolean).length}/${passed.length} Passed` : "Not Run"}
+                        </span>
                     </div>
-                </div>
 
-                <div className="m-5">
-                    <strong className="text-gray-300">Output:</strong>
-                    {error ?
-                        <div className="p-3 rounded-xl mt-2 h-auto min-h-10 whitespace-pre-wrap break-words text-sm font-mono bg-red-950/40 text-red-300 border border-red-900/60">{formatOutput(outputs[highlightedCard])}</div> :
-                        <div className="bg-brand-gray-light text-gray-400 p-3 rounded-xl mt-2 h-auto min-h-10 font-mono text-sm">
-                            {JSON.stringify(outputs[highlightedCard], null, 2)}
-                        </div>}
-                </div>
+                    <div className="flex flex-wrap gap-1.5">
+                        {testCycle.map((_, index) => (
+                            <div key={index}>
+                                {passed.length > 0 ?
+                                    <TestCard index={index} passed={passed[index]} highlight={index === highlightedCard} handleCardClick={handleCardClick} /> :
+                                    <TestCard index={index} highlight={index === highlightedCard} handleCardClick={handleCardClick} />}
+                            </div>
+                        ))}
+                    </div>
 
-                <div className="m-5">
-                    <strong className="text-gray-300">Expected result:</strong>
-                    <div className="bg-brand-gray-light text-gray-400 p-3 rounded-xl mt-2 h-auto min-h-10 font-mono text-sm">
-                        {JSON.stringify(testCycle[highlightedCard].expected, null, 2)}
+                    <div className="rounded-xl border border-gray-700 bg-brand-gray-light/40 p-4">
+                        <p className="text-xs uppercase tracking-widest font-semibold text-gray-500 mb-2">Input</p>
+                        <pre className="bg-brand-gray-light text-gray-300 p-3 rounded-xl min-h-10 font-mono text-sm whitespace-pre-wrap break-words border border-gray-700">
+                            {Object.entries(testCycle[highlightedCard].input)
+                                .map(([key, value]) => `${key}: ${JSON.stringify(value, null, 2)}`)
+                                .join(", ")}
+                        </pre>
+                    </div>
+
+                    <div className="rounded-xl border border-gray-700 bg-brand-gray-light/40 p-4">
+                        <p className="text-xs uppercase tracking-widest font-semibold text-gray-500 mb-2">Output</p>
+                        {error ?
+                            <pre className="p-3 rounded-xl min-h-10 whitespace-pre-wrap break-words text-sm font-mono bg-red-950/40 text-red-300 border border-red-900/60">{formatOutput(outputs[highlightedCard])}</pre> :
+                            <pre className="bg-brand-gray-light text-gray-300 p-3 rounded-xl min-h-10 font-mono text-sm whitespace-pre-wrap break-words border border-gray-700">
+                                {JSON.stringify(outputs[highlightedCard], null, 2)}
+                            </pre>}
+                    </div>
+
+                    <div className="rounded-xl border border-gray-700 bg-brand-gray-light/40 p-4">
+                        <p className="text-xs uppercase tracking-widest font-semibold text-gray-500 mb-2">Expected Result</p>
+                        <pre className="bg-brand-gray-light text-gray-300 p-3 rounded-xl min-h-10 font-mono text-sm whitespace-pre-wrap break-words border border-gray-700">
+                            {JSON.stringify(testCycle[highlightedCard].expected, null, 2)}
+                        </pre>
                     </div>
                 </div>
             </div>

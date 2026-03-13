@@ -10,13 +10,18 @@ type TestCardProps = {
 export default function TestCard({ index, passed, highlight, handleCardClick }: TestCardProps) {
     return (
         <>
-            <div
-                className={`flex justify-center text-gray-300 m-3 py-2 px-5 rounded-xl cursor-pointer w-30 transition-colors duration-300 ${highlight ? "bg-brand-gray-light" : "bg-brand-gray"} hover:bg-brand-gray-light`}
+            <button
+                type="button"
+                className={`flex items-center justify-center gap-2 py-2 px-4 rounded-xl cursor-pointer min-w-[110px] border text-sm font-semibold transition-all duration-200 ${highlight
+                    ? "bg-purple-700/30 border-purple-500/40 text-white"
+                    : "bg-brand-gray-light/40 border-gray-700 text-gray-300 hover:bg-brand-gray-light hover:border-gray-600"}`}
                 onClick={() => handleCardClick(index)}
             >
-                {passed !== undefined ? (passed ? <Check className="inline-block mr-2 text-green-500" /> : <X className="inline-block mr-2 text-red-500" />) : null}
-                Test {index + 1}
-            </div>
+                {passed !== undefined ? (
+                    passed ? <Check size={15} className="text-green-400" /> : <X size={15} className="text-red-400" />
+                ) : null}
+                <span>Test {index + 1}</span>
+            </button>
         </>
     );
 }
