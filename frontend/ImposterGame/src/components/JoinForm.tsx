@@ -81,7 +81,8 @@ export default function JoinForm({ onCancelJoinClick }: JoinFormProps) {
               id="roomId"
               placeholder="Enter room code"
               value={roomId}
-              onChange={(e) => setRoomId(e.target.value)}
+              onChange={(e) => setRoomId(e.target.value.toUpperCase())}
+              autoCapitalize="characters"
               className="border border-gray-700 rounded bg-brand-gray-light text-white px-3 py-1"
             />
           </div>

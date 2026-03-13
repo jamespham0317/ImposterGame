@@ -18,13 +18,14 @@ export default function JoinForm({ onInfoExitClick }: JoinFormProps) {
                         <X />
                     </button>
                     <div className="text-gray-500 m-5 text-center">
-                        CheetCode is a multiplayer social deduction game where players must use
-                        logic, communication, and a bit of deception to win. Each round,
-                        players work together to solve coding problems while trying to
+                        CheetCode is a multiplayer game where players must use
+                        logic and a bit of deception to win. Each round,
+                        players work together to solve a coding problem while trying to
                         identify the hidden imposter among them. The imposter’s goal is to
                         blend in and avoid suspicion without knowing the problem, while the
                         rest of the group must collaborate and pay attention to subtle clues
-                        to figure out who doesn’t belong. The game combines elements of programming
+                        to figure out who doesn’t belong.
+                        <br /> <br /> The game combines elements of programming
                         challenges with the strategy and psychology of party games. Whether you're
                         trying to solve problems efficiently or secretly sabotage the team, every
                         round creates new opportunities for clever plays, surprising

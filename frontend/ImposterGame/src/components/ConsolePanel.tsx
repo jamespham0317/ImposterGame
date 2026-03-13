@@ -24,20 +24,12 @@ export default function ConsolePanel({ height, isOpen, onResize }: ConsolePanelP
     const [passed, setPassed] = useState<boolean[]>([]);
 
     const formatOutput = (value: any) => {
-        if (typeof value === "string") {
-            return value
-                .replace(/\\r\\n/g, "\n")
-                .split("\n")
-                .map((line) => line.trim())
-                .filter(Boolean)
-                .join("\n");
-        }
-
-        try {
-            return JSON.stringify(value, null, 2);
-        } catch {
-            return String(value);
-        }
+        return value
+            .replace(/\\r\\n/g, "\n")
+            .split("\n")
+            .map((line: string) => line.trim())
+            .filter(Boolean)
+            .join("\n");
     };
 
     useEffect(() => {
@@ -112,7 +104,7 @@ export default function ConsolePanel({ height, isOpen, onResize }: ConsolePanelP
                 </div>
                 <div className="m-5">
                     <strong className="text-gray-300">Input:</strong>
-                    <div className="bg-brand-gray-light text-gray-400 p-3 rounded-xl mt-2 h-auto min-h-12">
+                    <div className="bg-brand-gray-light text-gray-400 p-3 rounded-xl mt-2 h-auto min-h-10 font-mono text-sm">
                         {Object.entries(testCycle[highlightedCard].input)
                             .map(([key, value]) => `${key}: ${JSON.stringify(value, null, 2)}`)
                             .join(", ")}
@@ -122,15 +114,15 @@ export default function ConsolePanel({ height, isOpen, onResize }: ConsolePanelP
                 <div className="m-5">
                     <strong className="text-gray-300">Output:</strong>
                     {error ?
-                        <div className="p-3 rounded-xl mt-2 h-auto min-h-12 whitespace-pre-wrap break-words text-sm font-mono bg-red-950/40 text-red-300 border border-red-900/60">{formatOutput(outputs[highlightedCard])}</div> :
-                        <div className="bg-brand-gray-light text-gray-400 p-3 rounded-xl mt-2 h-auto min-h-12">
+                        <div className="p-3 rounded-xl mt-2 h-auto min-h-10 whitespace-pre-wrap break-words text-sm font-mono bg-red-950/40 text-red-300 border border-red-900/60">{formatOutput(outputs[highlightedCard])}</div> :
+                        <div className="bg-brand-gray-light text-gray-400 p-3 rounded-xl mt-2 h-auto min-h-10 font-mono text-sm">
                             {JSON.stringify(outputs[highlightedCard], null, 2)}
                         </div>}
                 </div>
 
                 <div className="m-5">
                     <strong className="text-gray-300">Expected result:</strong>
-                    <div className="bg-brand-gray-light text-gray-400 p-3 rounded-xl mt-2 h-auto min-h-12">
+                    <div className="bg-brand-gray-light text-gray-400 p-3 rounded-xl mt-2 h-auto min-h-10 font-mono text-sm">
                         {JSON.stringify(testCycle[highlightedCard].expected, null, 2)}
                     </div>
                 </div>

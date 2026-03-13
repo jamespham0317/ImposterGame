@@ -14,7 +14,6 @@ export default function ResultsPanel() {
     const navigate = useNavigate();
 
     const onMainMenuClick = () => {
-        console.log("Navigating to main menu...");
         navigate("/");
     };
 

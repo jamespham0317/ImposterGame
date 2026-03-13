@@ -19,8 +19,8 @@ export default function ImposterPanel() {
                     <br />
                     <br />
                     <strong className="text-gray-300">Hint:</strong>
-                    <div className="bg-brand-gray-light p-3 m-2 rounded-xl">
-                        {problem.topics.map((topic, index) => (
+                    <div className="bg-brand-gray-light p-3 m-2 rounded-xl font-mono text-sm">
+                        {problem.topics.map((topic: string, index: number) => (
                             <div key={index}>
                                 {topic}
                             </div>
