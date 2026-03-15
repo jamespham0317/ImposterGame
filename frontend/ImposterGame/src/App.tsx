@@ -1,4 +1,4 @@
-import { Routes, Route, Outlet } from "react-router-dom";
+import { Routes, Route, Outlet, Navigate } from "react-router-dom";
 
 import Welcome from "./pages/Welcome.tsx";
 import Lobby from "./pages/Lobby.tsx";
@@ -30,6 +30,7 @@ function App() {
             }
           />
         </Route>
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </SocketProvider>
   );
