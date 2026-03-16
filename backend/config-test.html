@@ -64,6 +64,8 @@ Difficulty:
 <br>
 <textarea id="log" rows="20" cols="80" readonly></textarea>
 
+
+
 <script>
   let ws = null;
 
@@ -76,13 +78,14 @@ Difficulty:
     const ts = new Date().toLocaleTimeString();
     el.value += `[${ts}] ${text}\n`;
     el.scrollTop = el.scrollHeight;
+    console.log(text);
   }
 
   function send(obj) {
     if (!ws || ws.readyState !== 1) { log('ERROR: not connected'); return; }
     const msg = JSON.stringify(obj);
-    ws.send(msg);
     log('SENT: ' + msg);
+    ws.send(msg);
   }
 
   function sendRaw() {
@@ -90,8 +93,8 @@ Difficulty:
     if (!raw) return;
     try { JSON.parse(raw); } catch(e) { log('ERROR: invalid JSON - ' + e.message); return; }
     if (!ws || ws.readyState !== 1) { log('ERROR: not connected'); return; }
+    log('SENT RAW: ' + raw);
     ws.send(raw);
-    log('SENT: ' + raw);
   }
 
   function toggleConnect() {
@@ -108,7 +111,6 @@ Difficulty:
         const d = JSON.parse(e.data);
         if (d.roomId) {
           document.getElementById('roomId').value = d.roomId;
-          log('room ID set to: ' + d.roomId);
         }
         if (d.type === 'game-started' && d.problem) {
           const p = d.problem;
@@ -116,7 +118,6 @@ Difficulty:
           document.getElementById('p-difficulty').textContent = p.difficulty || '—';
           document.getElementById('p-topics').textContent = (p.topics || []).join(', ') || '—';
           document.getElementById('p-description').textContent = p.description || '—';
-          log('problem loaded: ' + p.title + ' (' + p.difficulty + ')');
         }
       } catch(_) {}
     };

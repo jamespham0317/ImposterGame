@@ -91,20 +91,17 @@ class Game:
         # you pick from the pool of problems that match the difficulty range, if none match you pick from the whole pool
         pool = []
         for p in problems.values():
-            if p["difficulty"] in difficulty_range:
+            if p["difficulty"].lower() in difficulty_range:
                 pool.append(p)
 
         if not pool:
             pool = list(problems.values())
 
-
-        print(f"difficulty_range: {difficulty_range}")
+        print(f"difficulty_range received: {difficulty_range}")
         print(f"pool size: {len(pool)}")
         print(f"pool difficulties: {[p['difficulty'] for p in pool]}")
 
         problem = random.choice(pool)
-
-        print(f"chosen problem: {problem['title']} ({problem['difficulty']})")
 
         # find the id for this problem
         problem_id = None
