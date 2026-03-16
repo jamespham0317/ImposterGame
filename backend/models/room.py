@@ -2,12 +2,14 @@ import asyncio
 import json
 from backend.models.player import Player
 from backend.models.game import Game
+from backend.models.roomConfig import roomConfig
 
 class Room:
     def __init__(self, id):
         self.id = id
         self.players = [] 
         self.game = None
+        self.config = roomConfig()
 
     def add_player(self, player_id, websocket):
         player = Player(player_id, websocket)
@@ -17,7 +19,7 @@ class Room:
         self.players[:] = [player for player in self.players if player.id != player_id]
 
     def create_game(self):
-        self.game = Game(self.players, self)
+        self.game = Game(self.players, self, self.config)
         return self.game
 
     def get_players_ids(self):

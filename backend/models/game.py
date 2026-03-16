@@ -6,6 +6,7 @@ from enum import Enum
 from typing import TypedDict
 
 from backend.managers.testRunner import TestRunner
+from backend.models.roomConfig import roomConfig
 
 class GameState(str, Enum):        
     CODING = "coding"            
@@ -36,8 +37,9 @@ class Commit(TypedDict):
     code: str
 
 class Game:
-    def __init__(self, players, room):
+    def __init__(self, players, room, config):
         self.room = room
+        self.config = config
 
         self.state = GameState.CODING
         self.time_left = 0
@@ -52,7 +54,7 @@ class Game:
         self.load_chat()
         self.commits = []
 
-        self.problem, self.test_cycle = self.load_random_problem_and_test_cycle()
+        self.problem, self.test_cycle = self.load_random_problem_and_test_cycle(config.difficulty_range)
         self.test_runner = TestRunner(self.test_cycle)
     
     def assign_imposter(self):
@@ -62,7 +64,11 @@ class Game:
     def load_chat(self):
         self.addMessage("System", "Chatroom is open. Keep your clues subtle.", time.time())
     
-    def load_random_problem_and_test_cycle(self):
+    def load_random_problem_and_test_cycle(self, difficulty_range=None):
+        if difficulty_range is None:
+            difficulty_range = ['easy', 'medium', 'hard']
+
+
         file_path = 'backend/data/problems.json'
 
         with open(file_path) as f:
@@ -81,8 +87,15 @@ class Game:
             } 
             for p in data["problems"]
         }
-        problem_id = random.randrange(1, len(problems)+1)
-        problem = problems.get(problem_id)
+
+        # you pick from the pool of problems that match the difficulty range, if none match you pick from the whole pool
+        pool = [p for p in problems.values() if p["difficulty"] in difficulty_range]
+        if not pool:
+            pool = list(problems.values())
+
+        problem = random.choice(pool)  # picks from pool correctly
+        problem_id = next(id for id, p in problems.items() if p == problem)
+
         problem_obj: Problem = {
             "id": problem_id,
             "title": problem["title"], 

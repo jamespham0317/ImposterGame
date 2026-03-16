@@ -143,6 +143,48 @@ async def handler(websocket):
                 connected_room_id = None
                 connected_player_id = None
 
+            elif msg_type == "update-config":
+                try:
+                    room_id = data["roomId"]
+                except KeyError:
+                    await websocket.send("Missing room ID")
+                    continue
+
+                if not room_manager.room_exists(room_id):
+                    await websocket.send("No room found: " + room_id)
+                    continue
+                room = room_manager.get_room(room_id)
+
+                if room.game_started():
+                    await websocket.send("Game already started in room: " + room_id)
+                    continue
+
+                if  connected_player_id != room.get_players_ids()[0]:
+                    await websocket.send("Only the host can update the config")
+                    continue
+
+                config = room.config
+                if "difficultyRange" in data:
+                    config.set_difficulty_range(data["difficultyRange"])
+                
+                if "masterTimer" in data:
+                    try:
+                        mt = int(data["masterTimer"])
+                        if mt > 0:
+                            config.master_timer = mt
+                    except ValueError:
+                        pass
+
+                            
+
+                response = {
+                    "type": "config-updated",
+                    "difficultyRange": config.difficulty_range,
+                    "masterTimer": config.master_timer
+                }
+
+                await room.broadcast(response)
+            
             elif msg_type == "start-game":
                 try:
                     room_id = data["roomId"]
