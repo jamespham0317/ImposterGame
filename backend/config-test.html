@@ -20,8 +20,6 @@
 <br><br>
 <button onclick="send({type:'join-room', roomId:rid(), playerId:pid()})">join-room</button>
 <button onclick="send({type:'leave-room', roomId:rid(), playerId:pid()})">leave-room</button>
-<button onclick="send({type:'start-game', roomId:rid()})">start-game</button>
-<button onclick="send({type:'player-ready', roomId:rid(), playerId:pid()})">player-ready</button>
 
 <h3>Config</h3>
 Difficulty:
@@ -34,6 +32,19 @@ Difficulty:
 <button onclick="sendConfig()">update-config</button>
 
 <h3>Game</h3>
+<button onclick="send({type:'start-game', roomId:rid()})">start-game</button>
+<button onclick="send({type:'player-ready', roomId:rid(), playerId:pid()})">player-ready</button>
+<br><br>
+
+<h4>Last problem received</h4>
+<table border="1" cellpadding="4" id="problem-table">
+  <tr><td>title</td><td id="p-title">—</td></tr>
+  <tr><td>difficulty</td><td id="p-difficulty">—</td></tr>
+  <tr><td>topics</td><td id="p-topics">—</td></tr>
+  <tr><td>description</td><td id="p-description" style="max-width:400px;white-space:pre-wrap">—</td></tr>
+</table>
+<br>
+
 <label>Message: <input id="chatMsg" size="30"></label>
 <button onclick="sendChat()">send-message</button>
 <br><br>
@@ -98,6 +109,14 @@ Difficulty:
         if (d.roomId) {
           document.getElementById('roomId').value = d.roomId;
           log('room ID set to: ' + d.roomId);
+        }
+        if (d.type === 'game-started' && d.problem) {
+          const p = d.problem;
+          document.getElementById('p-title').textContent = p.title || '—';
+          document.getElementById('p-difficulty').textContent = p.difficulty || '—';
+          document.getElementById('p-topics').textContent = (p.topics || []).join(', ') || '—';
+          document.getElementById('p-description').textContent = p.description || '—';
+          log('problem loaded: ' + p.title + ' (' + p.difficulty + ')');
         }
       } catch(_) {}
     };
