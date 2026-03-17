@@ -87,7 +87,7 @@ export default function Lobby() {
     navigate("/");
   }
 
-  const canStartGame = players.length >= 2 && players[0] === username;
+  const canStartGame = players.length >= 3 && players[0] === username;
 
   return (
     <>
@@ -178,7 +178,7 @@ export default function Lobby() {
                     <p className="text-gray-600 text-xs text-center">
                       {players[0] !== username
                         ? "Only the host can start"
-                        : "Need at least 2 players"}
+                        : "Need at least 3 players"}
                     </p>
                   )}
                 </div>

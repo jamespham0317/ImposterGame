@@ -47,6 +47,12 @@ Frontend -> Backend:
     Response: chat-update
         chat
 
+    Request: new-code
+        roomId
+        code
+    Response: new-code
+        code
+
     Request: run-test-cycle
         roomId
         playerId

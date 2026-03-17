@@ -323,6 +323,33 @@ async def handler(websocket):
                     "chat": game.get_chat()
                 }
                 await room.broadcast(response)
+
+            elif msg_type == "new-code":
+                try:
+                    room_id = data["roomId"]
+                except KeyError:
+                    await websocket.send("Missing room ID")
+                    continue
+                try:
+                    code = data["code"]
+                except KeyError:
+                    await websocket.send("Missing code")
+                    continue
+
+                if not room_manager.room_exists(room_id):
+                    await websocket.send("No room found: " + room_id)
+                    continue
+                
+                room = room_manager.get_room(room_id)
+                if not room.game_started():
+                    await websocket.send("Game not in progress")
+                    continue
+
+                response = {
+                    "type": "new-code",
+                    "code": code
+                }
+                await room.broadcast(response)
             
             elif msg_type == "run-test-cycle":
                 try:
@@ -432,12 +459,12 @@ async def handler(websocket):
                 if game.get_number_of_votes() == room.get_number_of_players():
                     await game.set_results()
 
-                response = {
-                    "type": "vote-over",
-                    "voted": game.get_voted(),
-                    "votedCorrectly": game.get_imposter_id() in game.get_voted(),
-                }
-                await room.broadcast(response)
+                    response = {
+                        "type": "vote-over",
+                        "voted": game.get_voted(),
+                        "votedCorrectly": game.get_imposter_id() in game.get_voted(),
+                    }
+                    await room.broadcast(response)
 
             elif msg_type == "get-health":
                 

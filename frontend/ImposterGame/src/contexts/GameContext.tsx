@@ -123,6 +123,9 @@ export default function GameProvider({ children }: GameProviderProps) {
         const unsubTimeLeft = onMessage("time-left", (data) => {
             setTime(data.timeLeft);
         });
+        const unsubNewCode = onMessage("new-code", (data) => {
+            setCode(data.code);
+        });
         const unsubTurnOver = onMessage("turn-over", () => {
             const response = {
                 type: "next-turn",
@@ -164,6 +167,7 @@ export default function GameProvider({ children }: GameProviderProps) {
             unsubPlayerReady();
             unsubBriefingOver();
             unsubTimeLeft();
+            unsubNewCode();
             unsubTurnOver();
             unsubNextTurn();
             unsubChatUpdate();
