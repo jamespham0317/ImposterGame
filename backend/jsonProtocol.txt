@@ -32,6 +32,7 @@ Frontend -> Backend:
         chat
         problem
         testCycle
+        masterTimer # int (seconds) total coding phase duration
 
     Request: send-message:
         roomId
