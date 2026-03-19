@@ -14,7 +14,7 @@ export default function VoteBar({ voting }: VoteBarProps) {
     const { send, isConnected } = useSocket();
     const { roomId, username } = useRoom();
     const {
-        time,
+        votingTime,
         players,
         votes
     } = useGame();
@@ -60,12 +60,12 @@ export default function VoteBar({ voting }: VoteBarProps) {
                     {voting ? (
                         <>
                             <strong className="font-bold text-3xl text-white leading-tight tabular-nums">
-                                {Math.floor(time / 60)}:{String(time % 60).padStart(2, "0")}
+                                {Math.floor(votingTime / 60)}:{String(votingTime % 60).padStart(2, "0")}
                             </strong>
                             <div className="mt-3 h-1.5 w-full rounded-full bg-gray-700 overflow-hidden">
                                 <div
                                     className="h-full bg-purple-600 transition-all duration-1000"
-                                    style={{ width: `${(time / 120) * 100}%` }}
+                                    style={{ width: `${(votingTime / 120) * 100}%` }}
                                 />
                             </div>
                         </>

@@ -191,8 +191,6 @@ async def handler(websocket):
                 }
 
                 await room.broadcast(response)
-
-                game.briefing_timer_task = asyncio.create_task(game.start_briefing_timer(30))
         
             elif msg_type == "set-ready":
                 try:
@@ -274,15 +272,17 @@ async def handler(websocket):
                     await websocket.send("Coding not in progress")
                     continue
 
-                await game.next_turn(player_id, code)
+                await game.set_next_turn(player_id, code)
+                time_manager = game.get_time_manager()
 
-                response = {
-                    "type": "next-turn",
-                    "currentPlayer": game.players[game.current_player_idx].id,
-                    "code": code,
-                    "chat": game.get_chat()
-                }
-                await room.broadcast(response)
+                if time_manager.num_rounds > 0:
+                    response = {
+                        "type": "next-turn",
+                        "currentPlayer": game.players[game.current_player_idx].id,
+                        "code": code,
+                        "chat": game.get_chat()
+                    }
+                    await room.broadcast(response)
 
             elif msg_type == "send-message":
                 try:
@@ -316,7 +316,7 @@ async def handler(websocket):
                     continue
 
                 game = room.get_game()
-                game.addMessage(player_id, message, timestamp)
+                game.add_message(player_id, message, timestamp)
 
                 response = {
                     "type": "chat-update",
@@ -399,20 +399,21 @@ async def handler(websocket):
 
                 outputs, passed, all_passed = game.parse_results(results)
 
-                if not all_passed:
-                    response = {
-                        "type": "test-results",
-                        "error": False,
-                        "outputList": outputs,
-                        "passedList": passed
-                    }
+                response = {
+                    "type": "test-results",
+                    "error": False,
+                    "outputList": outputs,
+                    "passedList": passed
+                }
 
-                    await websocket.send(json.dumps(response))
-                else:
-                    await game.set_voting(player_id, code)
+                await websocket.send(json.dumps(response))
+                
+                if all_passed:
+                    game.add_commit(player_id, code)
+                    await game.set_voting()
                     
                     response = {
-                        "type": "start-vote",
+                        "type": "coding-over",
                         "commits": game.get_commits(),
                         "votes": game.get_votes(),
                         "chat": game.get_chat()
@@ -460,9 +461,9 @@ async def handler(websocket):
                     await game.set_results()
 
                     response = {
-                        "type": "vote-over",
+                        "type": "voting-over",
                         "voted": game.get_voted(),
-                        "votedCorrectly": game.get_imposter_id() in game.get_voted(),
+                        "votedCorrectly": game.get_imposter_id() in game.get_voted()
                     }
                     await room.broadcast(response)
 

@@ -8,8 +8,8 @@ export default function BriefingPanel() {
     const { send, isConnected } = useSocket();
     const { roomId, username } = useRoom();
     const {
-        players,
         briefingTime,
+        players,
         readyCount,
         problem,
         imposter

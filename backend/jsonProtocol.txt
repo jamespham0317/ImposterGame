@@ -57,14 +57,10 @@ Frontend -> Backend:
         roomId
         playerId
         code 
-    Response: test-results # if not all tests passed
+    Response: test-results
         error
         outputList
         passedList
-    Response: start-vote # if all tests passed
-        commits
-        votes
-        chat
 
     Request: next-turn
         roomId
@@ -96,10 +92,19 @@ Backend -> Frontend
 
     Message briefing-over
 
-    Message: time-left
-        timeLeft
+    Message: coding-time-left
+        codingTimeLeft
+        turnTimeLeft
 
     Message: turn-over
+
+    Message: coding-over
+        commits
+        votes
+        chat
+
+    Message: voting-time-left
+        votingTimeLeft
 
     Message: vote-over
         votedList
