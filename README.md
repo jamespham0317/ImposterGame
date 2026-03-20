@@ -2,6 +2,76 @@
 
 # CheetCode
 
+## 🧰 Python Backend Setup
+
+### 1. Create a virtual environment
+
+```bash
+python -m venv .venv
+```
+
+### 2. Activate it
+
+**Mac/Linux:**
+
+```bash
+source .venv/bin/activate
+```
+
+**Windows (PowerShell):**
+
+```bash
+.venv\Scripts\Activate.ps1
+```
+
+**Windows (cmd):**
+
+```bash
+.venv\Scripts\activate
+```
+
+---
+
+### 3. Install dependencies
+
+```bash
+pip install -r requirements.txt
+```
+
+---
+
+### 4. Run the project
+
+```bash
+python main.py
+```
+
+---
+
+## ➕ Adding New Dependencies
+
+Install a package:
+
+```bash
+pip install <package-name>
+```
+
+Update `requirements.txt`:
+
+```bash
+pip freeze > requirements.txt
+```
+
+---
+
+## 🧠 Notes
+
+* `.venv/` should be in `.gitignore`
+* `requirements.txt` should be committed
+* Always activate `.venv` before installing or running anything
+
+
+
 ## How to Start
 ```
 # Run server
