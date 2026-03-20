@@ -95,9 +95,9 @@ class TimeManager:
                 voting_time_left -= 1
 
             response = {
-                "type": "vote-casted",
-                "voteList": self.game.get_votes(),
-                "chat": self.game.get_chat()
+                "type": "voting-over",
+                "voted": self.game.get_voted(),
+                "votedCorrectly": self.game.get_imposter_id() in self.game.get_voted()
             }
             await self.room.broadcast(response)
             
