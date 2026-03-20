@@ -67,13 +67,14 @@ Frontend -> Backend:
         playerId
         code
     Response: next-turn
-        currentPlayer
+        playerId
         code
         chat
 
     Request: cast-vote
         roomId
-        playerId
+        voterId
+        votedId
     Response: vote-casted
         votes
         chat
@@ -84,7 +85,7 @@ Backend -> Frontend
 
     Message: game-players-update
         playerList
-        currentPlayer
+        playerId
         chat
 
     Message: briefing-time-left
@@ -106,9 +107,13 @@ Backend -> Frontend
     Message: voting-time-left
         votingTimeLeft
 
-    Message: vote-over
+    Message: voting-over
         votedList
         votedCorrectly
+
+    Message: imposter-disconnected
+
+    Message: not-enough-players
 
 Other:
     Request: get-health

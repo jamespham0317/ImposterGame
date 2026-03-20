@@ -35,7 +35,7 @@ async def handle_disconnect(room_id, player_id):
                     response = {
                         "type": "game-players-update",
                         "playerList": game.get_player_ids(),
-                        "currentPlayer": game.players[game.current_player_idx].id,
+                        "playerId": game.players[game.current_player_idx].id,
                         "chat": game.get_chat()
                     }
                     await room.broadcast(response)
@@ -278,7 +278,7 @@ async def handler(websocket):
                 if time_manager.num_rounds > 0:
                     response = {
                         "type": "next-turn",
-                        "currentPlayer": game.players[game.current_player_idx].id,
+                        "playerId": game.players[game.current_player_idx].id,
                         "code": code,
                         "chat": game.get_chat()
                     }
@@ -428,9 +428,14 @@ async def handler(websocket):
                     await websocket.send("Missing room ID")
                     continue
                 try:
-                    player_id = data["playerId"]
+                    voter_id = data["voterId"]
                 except KeyError:
-                    await websocket.send("Missing player ID")
+                    await websocket.send("Missing voter ID")
+                    continue
+                try:
+                    voted_id = data["votedId"]
+                except KeyError:
+                    await websocket.send("Missing voted ID")
                     continue
 
                 if not room_manager.room_exists(room_id):
@@ -448,7 +453,7 @@ async def handler(websocket):
                     await websocket.send("Voting not in progress")
                     continue
 
-                game.cast_vote(player_id)
+                game.cast_vote(voter_id, voted_id)
 
                 response = {
                     "type": "vote-casted",

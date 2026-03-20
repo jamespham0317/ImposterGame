@@ -11,6 +11,7 @@ import ProblemPanel from "../components/ProblemPanel.tsx";
 import ResultsPanel from "../components/ResultsPanel.tsx";
 import EditorPanel from "../components/EditorPanel.tsx";
 import CommitPanel from "../components/CommitPanel.tsx";
+import ErrorPanel from "../components/ErrorPanel.tsx";
 
 import { GameState } from "../contexts/GameContext.tsx";
 
@@ -26,6 +27,8 @@ type GameLocationState = {
 
 export default function Game() {
     const {
+        gameError, 
+        gameErrorMessage,
         gameState,
         setPlayers,
         setCurrentPlayer,
@@ -65,7 +68,8 @@ export default function Game() {
     return (
         <>
             {isBriefing && <BriefingPanel />}
-            <div className={`flex h-screen flex-col bg-brand-black transition-all duration-300 ${isBriefing ? "pointer-events-none select-none" : ""}`}>
+            {gameError && <ErrorPanel />}
+            <div className={`flex h-screen flex-col bg-brand-black transition-all duration-300 ${isBriefing || gameError ? "pointer-events-none select-none" : ""}`}>
                 <div className="px-5 pt-5 pb-3">
                     <div className="flex items-center justify-between">
                         <Logo />

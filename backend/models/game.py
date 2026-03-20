@@ -131,10 +131,10 @@ class Game:
         except json.JSONDecodeError:
             return [None] * len(self.test_cycle), [False] * len(self.test_cycle), False
 
-    def cast_vote(self, player_id):
-        self.add_message("System", f"{self.players[self.current_player_idx].id} has cast their vote.", time.time())
+    def cast_vote(self, voter_id, voted_id):
+        self.add_message("System", f"{voter_id} has cast their vote.", time.time())
         for player in self.players:
-            if player.id == player_id:
+            if player.id == voted_id:
                 player.add_vote()
                 break
 
@@ -229,15 +229,27 @@ class Game:
         disconnected_index = next((i for i, player in enumerate(self.players) if player.id == player_id), -1)
         if disconnected_index == -1:
             return
-
+        
+        was_imposter = self.players[disconnected_index].is_imposter()
         was_current_player = disconnected_index == self.current_player_idx
 
         self.players.pop(disconnected_index)
-        self.add_message("System", f"{player_id} disconnected.", time.time())
 
-        if len(self.players) == 0:
-            await self.time_manager.stop_coding_timer()
+        if was_imposter:
+            await self.room.broadcast({
+                "type": "imposter-disconnected"
+            })
+            await self.time_manager.stop_all_timers()
             return
+
+        if len(self.players) < 3:
+            await self.room.broadcast({
+                "type": "not-enough-players"
+            })
+            await self.time_manager.stop_all_timers()
+            return
+
+        self.add_message("System", f"{player_id} disconnected.", time.time())
 
         if disconnected_index < self.current_player_idx:
             self.current_player_idx -= 1
@@ -245,8 +257,21 @@ class Game:
         if was_current_player:
             self.current_player_idx = self.current_player_idx % len(self.players)
 
+        if self.state == GameState.BRIEFING and self.get_number_of_ready() >= len(self.players) // 3:
+            await self.room.broadcast({
+                "type": "briefing-over"
+            })
+            await self.set_coding()
+
         if self.state == GameState.CODING and was_current_player:
             self.add_message("System", f"{self.players[self.current_player_idx].id}'s turn to code.", time.time())
 
         if self.state == GameState.VOTING and self.get_number_of_votes() >= len(self.players):
+            response = {
+                "type": "voting-over",
+                "voted": self.get_voted(),
+                "votedCorrectly": self.get_imposter_id() in self.get_voted()
+            }
+            await self.room.broadcast(response)
+
             await self.set_results()

@@ -20,6 +20,10 @@ type GameProviderProps = {
 };
 
 type GameContextValue = {
+    gameError: boolean;
+    setGameError: React.Dispatch<React.SetStateAction<boolean>>;
+    gameErrorMessage: string;
+    setGameErrorMessage: React.Dispatch<React.SetStateAction<string>>;
     gameState: string;
     setGameState: React.Dispatch<React.SetStateAction<string>>;
     briefingTime: number;
@@ -57,6 +61,10 @@ type GameContextValue = {
 };
 
 const GameContext = createContext<GameContextValue>({
+    gameError: false,
+    setGameError: (_gameError: React.SetStateAction<boolean>) => { },
+    gameErrorMessage: "",
+    setGameErrorMessage: (_gameErrorMessage: React.SetStateAction<string>) => { },
     gameState: GameState.Briefing,
     setGameState: (_gameState: React.SetStateAction<string>) => { },
     briefingTime: 0,
@@ -97,6 +105,9 @@ export default function GameProvider({ children }: GameProviderProps) {
     const { onMessage, send } = useSocket();
     const { roomId, username } = useRoom();
 
+    const [gameError, setGameError] = useState<boolean>(false);
+    const [gameErrorMessage, setGameErrorMessage] = useState<string>("");
+
     const [gameState, setGameState] = useState<string>(GameState.Briefing);
     const [briefingTime, setBriefingTime] = useState<number>(0);
     const [codingTime, setCodingTime] = useState<number>(0);
@@ -121,6 +132,14 @@ export default function GameProvider({ children }: GameProviderProps) {
     const [votedCorrectly, setVotedCorrectly] = useState<boolean>(false);
 
     useEffect(() => {
+        const unsubImposterDisconnected = onMessage("imposter-disconnected", () => {
+            setGameError(true);
+            setGameErrorMessage("The imposter has disconnected. The game cannot continue.");
+        });
+        const unsubNotEnoughPlayers = onMessage("not-enough-players", () => {
+            setGameError(true);
+            setGameErrorMessage("Not enough players. The game cannot continue.");
+        });
         const unsubBriefingTimeLeft = onMessage("briefing-time-left", (data) => {
             setBriefingTime(data.briefingTimeLeft);
         });
@@ -150,7 +169,7 @@ export default function GameProvider({ children }: GameProviderProps) {
             send(response);
         });
         const unsubNextTurn = onMessage("next-turn", (data) => {
-            setCurrentPlayer(data.currentPlayer);
+            setCurrentPlayer(data.playerId);
             setCode(data.code);
             setChat(data.chat);
         });
@@ -173,10 +192,12 @@ export default function GameProvider({ children }: GameProviderProps) {
         });
         const unsubPlayersUpdate = onMessage("game-players-update", (data) => {
             setPlayers(data.playerList);
-            setCurrentPlayer(data.currentPlayer);
+            setCurrentPlayer(data.playerId);
             setChat(data.chat);
         });
         return () => {
+            unsubImposterDisconnected();
+            unsubNotEnoughPlayers();
             unsubBriefingTimeLeft();
             unsubCodingTimeLeft();
             unsubVotingTimeLeft();
@@ -194,6 +215,10 @@ export default function GameProvider({ children }: GameProviderProps) {
     }, [onMessage, send, roomId, username, code]);
 
     const value = {
+        gameError,
+        setGameError,
+        gameErrorMessage,
+        setGameErrorMessage,
         gameState,
         setGameState,
         briefingTime,

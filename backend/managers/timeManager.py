@@ -94,13 +94,19 @@ class TimeManager:
                 await asyncio.sleep(1)
                 voting_time_left -= 1
 
-            await self.room.broadcast({
-                "type": "voting-over",
-                "voted": self.game.get_voted(),
-                "votedCorrectly": self.game.get_imposter_id() in self.game.get_voted()
-            })
+            response = {
+                "type": "vote-casted",
+                "voteList": self.game.get_votes(),
+                "chat": self.game.get_chat()
+            }
+            await self.room.broadcast(response)
             
             await self.game.set_results()
 
         except asyncio.CancelledError:
             pass
+
+    async def stop_all_timers(self):
+        await self.stop_briefing_timer()
+        await self.stop_coding_timer()
+        await self.stop_voting_timer()

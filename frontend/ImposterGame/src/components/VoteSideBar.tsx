@@ -2,7 +2,7 @@ import { useSocket } from "../contexts/SocketContext.tsx";
 import { useGame } from "../contexts/GameContext.tsx";
 import { useRoom } from "../contexts/RoomContext.tsx";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import VoteUserCard from "./VoteUserCard.tsx";
 
@@ -22,6 +22,14 @@ export default function VoteBar({ voting }: VoteBarProps) {
     const [voted, setVoted] = useState<boolean>(false);
     const [selectedUser, setSelectedUser] = useState<string>("");
 
+    useEffect(() => {
+        console.log("Players updated:", players);
+        if (!players.includes(selectedUser)) {
+            setSelectedUser("");
+            setVoted(false);
+        }
+    }, [players]);
+
     const handleCardClick = (username: string) => {
         setSelectedUser(username)
     };
@@ -34,7 +42,8 @@ export default function VoteBar({ voting }: VoteBarProps) {
         const request = {
             type: "cast-vote",
             roomId: roomId,
-            playerId: selectedUser
+            voterId: username,
+            votedId: selectedUser
         };
         send(request);
         setVoted(true);

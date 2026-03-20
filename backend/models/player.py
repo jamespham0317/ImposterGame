@@ -20,3 +20,6 @@ class Player:
 
     def add_vote(self):
         self.votes += 1
+
+    def is_imposter(self):
+        return self.role == Role.IMPOSTER
