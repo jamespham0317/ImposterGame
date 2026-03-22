@@ -2,8 +2,10 @@ import random
 import json
 import time
 import asyncio
+
 from enum import Enum
 from typing import TypedDict
+from better_profanity import profanity
 
 from backend.managers.timeManager import TimeManager
 from backend.managers.testRunner import TestRunner
@@ -111,6 +113,8 @@ class Game:
         self.commits.append(commit)
 
     def add_message(self, sender, message, timestamp):
+        message = profanity.censor(message, "*")
+
         msg: Message = {
             "sender": sender,
             "message": message,
