@@ -44,7 +44,6 @@ class Game:
         self.state = GameState.CODING
         self.time_left = 0
         self.timer_task = None
-        self.master_timer_task = None
 
         self.players = players
         random.shuffle(self.players)
@@ -59,19 +58,8 @@ class Game:
         self.test_runner = TestRunner(self.test_cycle)
     
     async def start_game(self):
-        self.addMessage("System", f"{self.players[self.current_player_idx].id}'s turn ro code", time.time())
+        self.addMessage("System", f"{self.players[self.current_player_idx].id}'s turn to code", time.time())
         self.timer_task = asyncio.create_task(self.start_timer(30))
-        self.master_timer_task = asyncio.create_task(self._master_timer())
-
-    async def _master_timer(self):
-        try:
-            await asyncio.sleep(self.confid.master_timer)
-            if self.state == GameState.CODING:
-                # times up for the whole coding phase, force the voting phase
-                last_player = self.players[self.current_player_idx]
-                await self.set_voting(last_player.id, self.commits[-1]["code"])
-        except asyncio.CancelledError:
-            pass
 
     def assign_imposter(self):
         imposter = random.choice(self.players)
@@ -259,8 +247,6 @@ class Game:
         self.add_commit(player_id, code)
         self.addMessage("System", "Voting has begun. Vote for the imposter!", time.time())
         await asyncio.create_task(self.stop_timer())
-        if self.master_timer_task and not self.master_timer_task.done():
-            self.master_timer_task.cancel()
         self.timer_task = asyncio.create_task(self.start_timer(120))
 
     async def set_results(self):
