@@ -3,6 +3,7 @@ import json
 import time
 import asyncio
 import os
+from typing import Optional
 
 from enum import Enum
 from typing import TypedDict
@@ -20,6 +21,11 @@ def _get_min_players_to_continue() -> int:
     return max(1, value)
 
 MIN_PLAYERS_TO_CONTINUE = _get_min_players_to_continue()
+
+class Constraints:
+    def __init__(self, allow_division: Optional[bool] = True):
+        self.allow_division = allow_division
+    allow_division: Optional[bool] = True
 
 class GameState(str, Enum):  
     BRIEFING = "briefing"      
@@ -41,6 +47,7 @@ class Problem(TypedDict):
     constraints: list
     topics: list
     code: str
+    constraint_keys: list
 
 class TestCycle(TypedDict):
     input: list
@@ -90,6 +97,7 @@ class Game:
         problem_id = random.randrange(0, len(data["problems"]))
 
         problem_data = data["problems"][problem_id]
+        constraints = problem_data.get("constraints", None)
         problem = {
             "title": problem_data["title"],
             "difficulty": problem_data["difficulty"],
@@ -98,7 +106,10 @@ class Game:
             "constraints": problem_data["constraints"],
             "topics": problem_data["topics"],
             "code": problem_data["code"],
-            "test_cases": problem_data["test_cases"]
+            "test_cases": problem_data["test_cases"],
+            "constraint_keys": Constraints(
+                allow_division= "no_division" not in constraints if constraints else False
+            )
         }
 
         problem_obj: Problem = {
@@ -109,9 +120,10 @@ class Game:
             "examples": problem["examples"],
             "constraints": problem["constraints"],
             "topics": problem["topics"],
-            "code": problem["code"]
+            "code": problem["code"],
+            "constraint_keys": problem["constraint_keys"]
         }
-        #How does the test obj work?
+        
         test_cases_obj: TestCycle = problem["test_cases"]
         self.add_commit("System", problem["code"])
         return problem_obj, test_cases_obj
@@ -133,8 +145,8 @@ class Game:
         }
         self.chat.append(msg)
 
-    def run_tests(self, code):
-        return self.test_runner.run_tests(code)
+    def run_tests(self, code, constraints):
+        return self.test_runner.run_tests(code, constraints)
 
     def parse_results(self, result):
         try:

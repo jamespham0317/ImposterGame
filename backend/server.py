@@ -400,7 +400,8 @@ async def handler(websocket):
                     await websocket.send("Coding not in progress")
                     continue
 
-                results = game.run_tests(code)              
+                print(game.get_problem())
+                results = game.run_tests(code, game.get_problem())              
                 if results.returncode != 0:
                     outputs, passed = [results.stderr] * len(game.get_test_cases()), [False] * len(game.get_test_cases())
                     response = {
