@@ -11,7 +11,7 @@ from better_profanity import profanity
 
 from backend.managers.timeManager import TimeManager
 from backend.managers.testRunner import TestRunner
-from backend.models.types import Constraints, TestCases, Problem, Results
+from backend.models.types import TestCases, Problem, Results
 
 def _get_min_players_to_continue() -> int:
     raw = os.getenv("MIN_PLAYERS_TO_CONTINUE", "3")
@@ -71,16 +71,18 @@ class Game:
     def load_chat(self):
         self.add_message("System", "Chatroom is open. Keep your clues subtle.", time.time())
     
-    def load_random_problem(self) -> tuple[Problem, TestCases, Constraints]:
+    def load_random_problem(self) -> tuple[Problem, TestCases, list[str]]:
         file_path = 'backend/data/algorithm.json'
 
         with open(file_path) as f:
             data = json.load(f)
 
         problem_id = random.randrange(0, len(data["problems"]))
-
+        problem_id = 3
         problem_data = data["problems"][problem_id]
-        constraints = problem_data.get("constraints", None)
+        
+        constraints = problem_data.get("constraint_list", [])
+
         problem = {
             "title": problem_data["title"],
             "difficulty": problem_data["difficulty"],
@@ -90,9 +92,7 @@ class Game:
             "topics": problem_data["topics"],
             "code": problem_data["code"],
             "test_cases": problem_data["test_cases"],
-            "constraint_list": Constraints(
-                allow_division= "no_division" not in constraints if constraints else False
-            )
+            "constraint_list": constraints
         }
 
         problem_obj: Problem = {
@@ -107,13 +107,9 @@ class Game:
         }
         
         test_cases_obj: TestCases = problem["test_cases"]
-
-        constraints_objL: Constraints = {
-            "allow_division": "no_division" not in problem["constraint_list"] if problem.get("constraint_list", None) else False
-        }
-
         self.add_commit("System", problem["code"])
-        return problem_obj, test_cases_obj, constraints_objL
+
+        return problem_obj, test_cases_obj, constraints
 
     def add_commit(self, player_id, code):
         commit: Commit = {
@@ -132,14 +128,13 @@ class Game:
         }
         self.chat.append(msg)
 
-    def run_tests(self, code, constraints):
+    def run_tests(self, code):
         return self.test_runner.run_tests(code)
 
     def parse_results(self, result):
         try:
-            print("Raw test runner result:", result.tests)
-            outputs = [r.get("output") for r in result.tests.get("results", [])]
-            passed = [r.get("passed") for r in result.tests.get("results", [])]
+            outputs = [r.get("output") for r in result["tests"].get("results", [])]
+            passed = [r.get("passed") for r in result["tests"].get("results", [])]
             all_passed = all(passed)
             return outputs, passed, all_passed
         except json.JSONDecodeError:

@@ -7,7 +7,7 @@ import textwrap
 import ast
 import requests
 
-from backend.models.types import Constraints, TestCases, Results
+from backend.models.types import Results
 
 
 def get_first_function_name(code):
@@ -52,17 +52,37 @@ class TestRunner:
         
         response = requests.post(url, json=payload).json()
         if response.get("status", "") != "success":
-            return Results(
-                returncode=1,
-                stdout="",
-                stderr=response.get('stderr', ''),
-                tests={'passed': False, 'results': []}
-            )
-        result = Results(
-            returncode=response.get("returncode"),
-            stdout=response.get("stdout"),
-            stderr=response.get("stderr"),
-            tests=response.get("tests"))
+            if response.get("status") == "timeout":
+                result : Results = {
+                    "returncode": 1,
+                    "stdout": "",
+                    "stderr": "Test execution timed out",
+                    "tests": {'passed': False, 'results': []}
+                }
+                return result
+            elif response.get("status") == "constraint_violation":
+                result : Results = {
+                    "returncode": 1,
+                    "stdout": "",
+                    "stderr": response.get("stderr", "Constraint violation"),
+                    "tests": {'passed': False, 'results': []}
+                }
+                return result
+
+
+            result : Results = {
+                "returncode": 1,
+                "stdout": "",
+                "stderr": response.get('error', 'Unknown error from test execution server'),
+                "tests": {'passed': False, 'results': []}
+            }
+            return result
+        result : Results = {
+            "returncode": response.get("returncode"),
+            "stdout": response.get("stdout"),
+            "stderr": response.get("stderr"),
+            "tests": { 'passed': response.get("passed", False), 'results': response.get("tests", []) }
+        }
         return result
 
     def locally_execute_tests(self, code): #Should be for dev only, not used in production
@@ -131,7 +151,6 @@ class TestRunner:
 
                 print(json.dumps(results))
             """).lstrip()
-            print(f"{tests_json!r}")
 
             runner_path = os.path.join(tmpdir, "testRunner.py")
             with open(runner_path, "w") as f:
@@ -144,10 +163,10 @@ class TestRunner:
                 text=True,
                 timeout=5
             )
-            result_data = Results(
-                returncode=result.returncode,
-                stdout=result.stdout,
-                stderr=result.stderr,
-                tests={'passed': False, 'results': json.loads(result.stdout)}
-            )
+            result_data : Results = {
+                "returncode": result.returncode,
+                "stdout": result.stdout,
+                "stderr": result.stderr,
+                "tests": {'passed': False, 'results': json.loads(result.stdout)}
+            }
             return result_data
