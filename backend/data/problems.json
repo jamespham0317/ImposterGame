@@ -58,7 +58,7 @@
                 { "input": ["abcabcbb"], "expected": 3, "visible": true },
                 { "input": ["bbbbb"], "expected": 1, "visible": true },
                 { "input": ["pwwkew"], "expected": 3, "visible": true },
-
+                
                 { "input": ["abba"], "expected": 2, "visible": false },
                 { "input": [" "], "expected": 1, "visible": false },
                 { "input": ["dvdf"], "expected": 3, "visible": false },
@@ -92,7 +92,7 @@
                 { "input": ["ADOBECODEBANC", "ABC"], "expected": "BANC", "visible": true },
                 { "input": ["a", "a"], "expected": "a", "visible": true },
                 { "input": ["a", "aa"], "expected": "", "visible": true },
-
+                
                 { "input": ["aa", "aa"], "expected": "aa", "visible": false },
                 { "input": ["abc", "d"], "expected": "", "visible": false },
                 { "input": ["aaflslflsldkalskaaa", "aaa"], "expected": "aaa", "visible": false },
@@ -128,7 +128,7 @@
                 { "input": [[1, 2, 3, 4]], "expected": [24, 12, 8, 6], "visible": true },
                 { "input": [[1, 2, 0, 4]], "expected": [0, 0, 8, 0], "visible": true },
                 { "input": [[-1, 1, -1, 1]], "expected": [-1, 1, -1, 1], "visible": true },
-
+                
                 { "input": [[2, 3, 0, 5]], "expected": [0, 0, 30, 0], "visible": false },
                 { "input": [[2, 3, 4, 5]], "expected": [60, 40, 30, 24], "visible": false },
                 { "input": [[3, 7]], "expected": [7, 3], "visible": false },
@@ -160,56 +160,85 @@
             ],
             "code": "def burstCounter(nums, target):\n    # Write your solution here\n    pass",
             "test_cases": [
-                {
-                    "input": [[1, 1, 1], 2],
-                    "expected": 2,
-                    "visible": true
-                },
-                {
-                    "input": [[1, 2, 3], 3],
-                    "expected": 2,
-                    "visible": true
-                },
-                {
-                    "input": [[3, 4, 7, 2, -3, 1, 4, 2], 7],
-                    "expected": 4,
-                    "visible": true
-                },
-                {
-                    "input": [[0, 0, 0, 0], 0],
-                    "expected": 10,
-                    "visible": false
-                },
-                {
-                    "input": [[1, -1, 1, -1, 1], 0],
-                    "expected": 6,
-                    "visible": false
-                },
-                {
-                    "input": [[5], 5],
-                    "expected": 1,
-                    "visible": false
-                },
-                {
-                    "input": [[5], 10],
-                    "expected": 0,
-                    "visible": false
-                },
-                {
-                    "input": [[2, 2, 2, 2], 4],
-                    "expected": 3,
-                    "visible": false
-                },
-                {
-                    "input": [[1, 2, 1, 2, 1], 3],
-                    "expected": 4,
-                    "visible": false
-                },
-                {
-                    "input": [[1, 1, 1, 1, 1, 1], 2],
-                    "expected": 5,
-                    "visible": false
-                }
+                { "input": [[1, 1, 1], 2], "expected": 2, "visible": true },
+                { "input": [[1, 2, 3], 3], "expected": 2, "visible": true },
+                { "input": [[3, 4, 7, 2, -3, 1, 4, 2], 7], "expected": 4, "visible": true },
+                
+                { "input": [[0, 0, 0, 0], 0], "expected": 10, "visible": false },
+                { "input": [[1, -1, 1, -1, 1], 0], "expected": 6, "visible": false },
+                { "input": [[5], 5], "expected": 1, "visible": false },
+                { "input": [[5], 10], "expected": 0, "visible": false },
+                { "input": [[2, 2, 2, 2], 4], "expected": 3, "visible": false },
+                { "input": [[1, 2, 1, 2, 1], 3], "expected": 4, "visible": false },
+                { "input": [[1, 1, 1, 1, 1, 1], 2], "expected": 5, "visible": false }
+            ]
+        },
+        {
+            "id": 7,
+            "title": "Mirror Shift",
+            "type": "Function",
+            "difficulty": "Easy",
+            "description": "Given two strings s and t of equal length, return true if you can make them equal by swapping exactly one pair of characters in s. Otherwise, return false.",
+            "examples": [
+                "Input: s = 'ab', t = 'ba'\nOutput: true",
+                "Input: s = 'aa', t = 'aa'\nOutput: true",
+                "Input: s = 'ab', t = 'ab'\nOutput: false"
+            ],
+            "constraints": [
+                "1 <= s.length <= 3000",
+                "s.length == t.length",
+                "s and t consist of lowercase English letters"
+            ],
+            "topics": [
+                "String",
+                "Counting"
+            ],
+            "code": "def mirrorShift(s, t):\n    # Write your solution here\n    pass",
+            "test_cases": [
+                { "input": ["ab", "ba"], "expected": true, "visible": true },
+                { "input": ["aa", "aa"], "expected": true, "visible": true },
+                { "input": ["ab", "ab"], "expected": false, "visible": true },
+
+                { "input": ["abcd", "abdc"], "expected": true, "visible": false },
+                { "input": ["abcd", "abcd"], "expected": false, "visible": false },
+                { "input": ["aaaaaa", "aaaaaa"], "expected": true, "visible": false },
+                { "input": ["abca", "abac"], "expected": true, "visible": false },
+                { "input": ["abc", "def"], "expected": false, "visible": false },
+                { "input": ["a", "a"], "expected": false, "visible": false },
+                { "input": ["abab", "abab"], "expected": true, "visible": false }
+            ]
+        },
+        {
+            "id": 8,
+            "title": "Streak Breaker",
+            "type": "Function",
+            "difficulty": "Easy",
+            "description": "Given a binary array, return the length of the longest subarray containing only 1s after deleting exactly one element.",
+            "examples": [
+                "Input: nums = [1,1,0,1]\nOutput: 3",
+                "Input: nums = [0,1,1,1,0,1,1]\nOutput: 5",
+                "Input: nums = [1,1,1]\nOutput: 2"
+            ],
+            "constraints": [
+                "1 <= nums.length <= 3000",
+                "nums[i] is either 0 or 1"
+            ],
+            "topics": [
+                "Sliding Window"
+            ],
+            "code": "def streakBreaker(nums):\n    # Write your solution here\n    pass",
+            "test_cases": [
+                { "input": [[1, 1, 0, 1]], "expected": 3, "visible": true},
+                { "input": [[0, 1, 1, 1, 0, 1, 1]], "expected": 5,"visible": true },
+                { "input": [[1, 1, 1]], "expected": 2, "visible": true },
+
+                { "input": [[0, 0, 0]], "expected": 0, "visible": false },
+                { "input": [[1]], "expected": 0, "visible": false },
+                { "input": [[1, 0, 1, 0, 1]], "expected": 2, "visible": false},
+                { "input": [[1, 1, 0, 0, 1, 1, 1]], "expected": 4, "visible": false },
+                { "input": [[0, 1, 0, 1, 0, 1]], "expected": 1, "visible": false },
+                { "input": [[1, 1, 1, 0, 1, 1]], "expected": 5, "visible": false },
+                { "input": [[0, 1]], "expected": 1, "visible": false }
             ]
         }
     ]
