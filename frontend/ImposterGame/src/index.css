@@ -33,3 +33,123 @@ body,
 .custom-scrollbar::-webkit-scrollbar-track {
     background-color: #212830;
 }
+
+.welcome-background {
+    isolation: isolate;
+}
+
+.welcome-background::before {
+    content: "";
+    position: absolute;
+    inset: -20%;
+    background:
+        radial-gradient(circle at 20% 20%, rgb(147 51 234 / 0.12), transparent 45%),
+        radial-gradient(circle at 80% 85%, rgb(59 130 246 / 0.1), transparent 45%);
+    z-index: 0;
+}
+
+.animated-orb {
+    position: absolute;
+    border-radius: 9999px;
+    filter: blur(10px);
+    z-index: 0;
+    opacity: 0.55;
+}
+
+.orb-one {
+    width: 22rem;
+    height: 22rem;
+    background: radial-gradient(circle at 30% 30%, rgb(168 85 247 / 0.45), transparent 70%);
+}
+
+.orb-two {
+    width: 20rem;
+    height: 20rem;
+    background: radial-gradient(circle at 40% 40%, rgb(96 165 250 / 0.42), transparent 70%);
+}
+
+.orb-three {
+    width: 14rem;
+    height: 14rem;
+    background: radial-gradient(circle at 35% 35%, rgb(244 114 182 / 0.25), transparent 70%);
+}
+
+.welcome-grid {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    background-image:
+        linear-gradient(to right, rgb(148 163 184 / 0.06) 1px, transparent 1px),
+        linear-gradient(to bottom, rgb(148 163 184 / 0.06) 1px, transparent 1px);
+    background-size: 44px 44px;
+    mask-image: radial-gradient(circle at center, black 30%, transparent 88%);
+    animation: drift-grid 26s linear infinite;
+}
+
+.welcome-title,
+.welcome-subtitle,
+.welcome-actions {
+    opacity: 0;
+    transform: translateY(14px);
+    animation: welcome-reveal 700ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.welcome-title {
+    animation-delay: 90ms;
+}
+
+.welcome-subtitle {
+    animation-delay: 180ms;
+}
+
+.welcome-actions {
+    animation-delay: 280ms;
+}
+
+@keyframes drift-grid {
+    0% {
+        transform: translate3d(0, 0, 0);
+    }
+    100% {
+        transform: translate3d(44px, 44px, 0);
+    }
+}
+
+@keyframes welcome-reveal {
+    from {
+        opacity: 0;
+        transform: translateY(14px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@media (max-width: 640px) {
+    .animated-orb {
+        opacity: 0.4;
+    }
+
+    .orb-one {
+        width: 16rem;
+        height: 16rem;
+    }
+
+    .orb-two {
+        width: 14rem;
+        height: 14rem;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .welcome-title,
+    .welcome-subtitle,
+    .welcome-actions {
+        animation: none !important;
+    }
+
+    .welcome-grid {
+        animation: none !important;
+    }
+}

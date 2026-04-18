@@ -1,9 +1,11 @@
 import { useSocket } from "../contexts/SocketContext.tsx";
 
 import { useEffect, useRef, useState } from "react";
+import { motion } from "framer-motion";
 
 import { useRoom } from "../contexts/RoomContext.tsx";
 import { useGame } from "../contexts/GameContext.tsx";
+import { buttonVariants, itemVariants, listContainerVariants, listItemVariants } from "../utils/animations.ts";
 
 export default function ProblemPanel() {
     const {
@@ -58,49 +60,60 @@ export default function ProblemPanel() {
 
     return (
         <>
-            <div className="w-[35%] min-w-[315px] max-h-[85vh] bg-brand-gray rounded-2xl my-3 border-2 border-gray-700 flex min-h-0 flex-col self-stretch overflow-hidden">
-                <div className="border-b border-gray-700 p-4">
-                    <div className="grid grid-cols-2 rounded-xl bg-brand-gray-light/60 p-1 gap-1">
-                        <button
+            <motion.div
+                className="flex h-full min-h-0 w-[31%] min-w-[280px] flex-col self-stretch overflow-hidden rounded-3xl border border-white/10 bg-[#101523]/85 backdrop-blur-md"
+                variants={itemVariants}
+                initial="hidden"
+                animate="visible"
+            >
+                <motion.div className="border-b border-white/10 p-4" variants={listItemVariants}>
+                    <div className="grid grid-cols-2 gap-1 rounded-xl bg-[#1a2030] p-1">
+                        <motion.button
                             type="button"
                             onClick={() => setActiveTab("problem")}
                             className={`cursor-pointer rounded-lg px-4 py-2 text-sm font-semibold transition-all duration-200 ${activeTab === "problem"
-                                ? "bg-purple-700 text-white"
-                                : "text-gray-400 hover:bg-gray-700/60 hover:text-gray-200"
+                                ? "bg-gradient-to-r from-cyan-600 to-purple-600 text-white"
+                                : "text-gray-400 hover:bg-white/10 hover:text-gray-200"
                                 }`}
+                            variants={buttonVariants}
+                            whileHover="hover"
+                            whileTap="tap"
                         >
                             Problem
-                        </button>
-                        <button
+                        </motion.button>
+                        <motion.button
                             type="button"
                             onClick={() => setActiveTab("chatroom")}
                             className={`cursor-pointer rounded-lg px-4 py-2 text-sm font-semibold transition-all duration-200 ${activeTab === "chatroom"
-                                ? "bg-purple-700 text-white"
-                                : "text-gray-400 hover:bg-gray-700/60 hover:text-gray-200"
+                                ? "bg-gradient-to-r from-cyan-600 to-purple-600 text-white"
+                                : "text-gray-400 hover:bg-white/10 hover:text-gray-200"
                                 }`}
+                            variants={buttonVariants}
+                            whileHover="hover"
+                            whileTap="tap"
                         >
                             Chatroom
-                        </button>
+                        </motion.button>
                     </div>
-                </div>
+                </motion.div>
 
                 {activeTab === "problem" ? (
                     username === imposter ? (
-                        <div className="min-h-0 flex-1 overflow-y-auto custom-scrollbar p-5 space-y-4">
-                            <div className="rounded-2xl border border-red-500/30 bg-red-500/10 px-5 py-6 text-center">
+                        <motion.div className="min-h-0 flex-1 overflow-y-auto custom-scrollbar p-5 space-y-4" variants={listContainerVariants} initial="hidden" animate="visible">
+                            <motion.div className="rounded-2xl border border-red-500/30 bg-red-500/10 px-5 py-6 text-center shadow-[0_0_40px_-24px_rgba(239,68,68,0.9)]" variants={listItemVariants}>
                                 <p className="text-xs uppercase tracking-widest font-semibold text-red-300">Role</p>
                                 <h1 className="text-2xl font-bold text-red-200 mt-1">You are the Imposter</h1>
                                 <p className="text-sm text-gray-400 mt-2">Blend in, gather clues, and avoid getting voted out.</p>
-                            </div>
+                            </motion.div>
 
-                            <div className="rounded-xl border border-gray-700 bg-brand-gray-light/40 p-4 space-y-2">
+                            <motion.div className="space-y-2 rounded-2xl border border-white/10 bg-white/[0.03] p-4" variants={listItemVariants}>
                                 <p className="text-xs uppercase tracking-widest font-semibold text-gray-500">Mission</p>
                                 <p className="text-sm text-gray-400 leading-relaxed">
                                     Speak confidently, ask smart questions, and mirror the group to stay under the radar.
                                 </p>
-                            </div>
+                            </motion.div>
 
-                            <div className="rounded-xl border border-gray-700 bg-brand-gray-light/40 p-4 space-y-3">
+                            <motion.div className="space-y-3 rounded-2xl border border-white/10 bg-white/[0.03] p-4" variants={listItemVariants}>
                                 <p className="text-xs uppercase tracking-widest font-semibold text-gray-500">Topic Hints</p>
                                 <div className="flex flex-wrap gap-2">
                                     {(problem.topics ?? []).map((topic: string, index: number) => (
@@ -112,34 +125,34 @@ export default function ProblemPanel() {
                                         </span>
                                     ))}
                                 </div>
-                            </div>
-                        </div>
+                            </motion.div>
+                        </motion.div>
                     ) : (
-                        <div className="min-h-0 flex flex-1 flex-col p-5 gap-4">
-                            <div className="space-y-2">
+                        <motion.div className="min-h-0 flex flex-1 flex-col p-5 gap-4" variants={listContainerVariants} initial="hidden" animate="visible">
+                            <motion.div className="space-y-2" variants={listItemVariants}>
                                 <h1 className="text-gray-100 font-bold text-2xl leading-tight">
                                     {problem.title}
                                 </h1>
                                 <span className={`inline-flex rounded-full border px-3 py-1 text-xs font-semibold ${difficultyStyle}`}>
                                     {problem.difficulty}
                                 </span>
-                            </div>
+                            </motion.div>
 
-                            <div className="min-h-0 flex-1 overflow-y-auto text-gray-400 custom-scrollbar pr-1 space-y-4">
-                                <p className="leading-relaxed">{problem.description}</p>
+                            <motion.div className="min-h-0 flex-1 overflow-y-auto text-gray-400 custom-scrollbar pr-1 space-y-4" variants={listContainerVariants}>
+                                <motion.p className="leading-relaxed" variants={listItemVariants}>{problem.description}</motion.p>
 
-                                <div className="space-y-3">
+                                <motion.div className="space-y-3" variants={listContainerVariants}>
                                     {(problem.examples ?? []).map((example: string, index: number) => (
-                                        <div key={index}>
+                                        <motion.div key={index} variants={listItemVariants}>
                                             <p className="text-gray-300 text-sm font-semibold mb-1">Example {index + 1}</p>
-                                            <pre className="bg-brand-gray-light border border-gray-700 p-3 rounded-xl whitespace-pre-wrap text-sm font-mono text-gray-300">
+                                            <pre className="whitespace-pre-wrap rounded-2xl border border-white/10 bg-[#171d2c] p-3 text-sm font-mono text-gray-300">
                                                 {example}
                                             </pre>
-                                        </div>
+                                        </motion.div>
                                     ))}
-                                </div>
+                                </motion.div>
 
-                                <div className="rounded-xl border border-gray-700 bg-brand-gray-light/40 p-4">
+                                <motion.div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4" variants={listItemVariants}>
                                     <p className="text-xs uppercase tracking-widest font-semibold text-gray-500 mb-2">Constraints</p>
                                     <ul className="list-disc pl-5 space-y-1">
                                         {(problem.constraints ?? []).map((constraint: string, index: number) => (
@@ -148,13 +161,13 @@ export default function ProblemPanel() {
                                             </li>
                                         ))}
                                     </ul>
-                                </div>
-                            </div>
-                        </div>
+                                </motion.div>
+                            </motion.div>
+                        </motion.div>
                     )
                 ) : (
-                    <div className="min-h-0 flex flex-1 flex-col px-5 py-5 gap-4 overflow-hidden">
-                        <div className="rounded-xl border border-gray-700 bg-brand-gray-light/60 p-3">
+                    <motion.div className="min-h-0 flex flex-1 flex-col px-5 py-5 gap-4 overflow-hidden" variants={listContainerVariants} initial="hidden" animate="visible">
+                        <motion.div className="rounded-2xl border border-white/10 bg-[#1a2030] p-3" variants={listItemVariants}>
                             <div className="flex items-center justify-between gap-3">
                                 <div>
                                     <p className="text-xs uppercase tracking-[0.2em] text-gray-500">Room</p>
@@ -164,25 +177,25 @@ export default function ProblemPanel() {
                                     {(players ?? []).length} online
                                 </div>
                             </div>
-                        </div>
+                        </motion.div>
 
-                        <div ref={chatContainerRef} className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden custom-scrollbar space-y-3 pr-1 w-full min-w-0">
+                        <motion.div ref={chatContainerRef} className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden custom-scrollbar space-y-3 pr-1 w-full min-w-0" variants={listContainerVariants}>
                             {chat.map((message: any, index: number) => {
                                 if (message.sender === "System") {
                                     return (
-                                        <div key={`${message.time}-${index}`} className="flex justify-center">
+                                        <motion.div key={`${message.time}-${index}`} className="flex justify-center" variants={listItemVariants}>
                                             <span className="rounded-full border border-gray-700 bg-gray-700/50 px-3 py-1 text-xs text-gray-400">
                                                 {message.message}
                                             </span>
-                                        </div>
+                                        </motion.div>
                                     );
                                 }
 
                                 const isOwnMessage = message.sender === username;
 
                                 return (
-                                    <div key={`${message.time}-${index}`} className={`flex min-w-0 ${isOwnMessage ? "justify-end" : "justify-start"}`}>
-                                        <div className={`max-w-[85%] min-w-0 overflow-hidden rounded-xl px-3 py-2 border ${isOwnMessage ? "bg-purple-600/20 border-purple-500/35" : "bg-brand-gray-light border-gray-700"}`}>
+                                    <motion.div key={`${message.time}-${index}`} className={`flex min-w-0 ${isOwnMessage ? "justify-end" : "justify-start"}`} variants={listItemVariants}>
+                                        <div className={`max-w-[85%] min-w-0 overflow-hidden rounded-2xl border px-3 py-2 ${isOwnMessage ? "border-cyan-400/40 bg-cyan-500/15" : "border-white/10 bg-white/[0.03]"}`}>
                                             <div className="mb-1 flex items-center gap-2 text-xs">
                                                 <span className={`font-semibold ${isOwnMessage ? "text-purple-300" : "text-gray-300"}`}>
                                                     {isOwnMessage ? "You" : message.sender}
@@ -191,19 +204,19 @@ export default function ProblemPanel() {
                                             </div>
                                             <p className="whitespace-pre-wrap break-all text-sm text-gray-200 [overflow-wrap:anywhere]">{message.message}</p>
                                         </div>
-                                    </div>
+                                    </motion.div>
                                 );
                             })}
-                        </div>
+                        </motion.div>
 
-                        <form className="flex items-stretch gap-3">
+                        <motion.form className="flex items-stretch gap-3" variants={listItemVariants}>
                             <div className="flex-1">
                                 <textarea
                                     id="chat-message"
                                     value={message}
                                     onChange={(event) => setMessage(event.target.value)}
                                     placeholder="Drop a hint or ask a question..."
-                                    className="w-full h-[50px] resize-none rounded-xl border border-gray-700 bg-brand-gray-light px-3 py-3 text-sm text-gray-200 placeholder-gray-500 outline-none focus:border-purple-600 transition-colors duration-200 custom-scrollbar"
+                                    className="custom-scrollbar h-[50px] w-full resize-none rounded-2xl border border-white/10 bg-[#1a2030] px-3 py-3 text-sm text-gray-200 placeholder-gray-500 outline-none transition-colors duration-200 focus:border-cyan-500"
                                     rows={1}
                                     maxLength={200}
                                     onKeyDown={(e) => {
@@ -214,18 +227,21 @@ export default function ProblemPanel() {
                                     }}
                                 />
                             </div>
-                            <button
+                            <motion.button
                                 type="button"
                                 onClick={onSendClick}
-                                className={`cursor-pointer h-[50px] px-5 rounded-xl font-bold text-sm text-white bg-purple-700 ${canSend ? "hover:bg-purple-600 active:scale-95" : ""} transition-all duration-200 disabled:cursor-default disabled:opacity-40`}
+                                className={`h-[50px] cursor-pointer rounded-2xl bg-gradient-to-r from-cyan-600 to-purple-600 px-5 text-sm font-bold text-white ${canSend ? "hover:from-cyan-500 hover:to-purple-500 active:scale-95" : ""} transition-all duration-200 disabled:cursor-default disabled:opacity-40`}
                                 disabled={!canSend}
+                                variants={buttonVariants}
+                                whileHover={canSend ? "hover" : undefined}
+                                whileTap={canSend ? "tap" : undefined}
                             >
                                 Send
-                            </button>
-                        </form>
-                    </div>
+                            </motion.button>
+                        </motion.form>
+                    </motion.div>
                 )}
-            </div>
+            </motion.div>
         </>
     );
 }

@@ -3,11 +3,13 @@ import { useRoom } from "../contexts/RoomContext.tsx";
 import { useGame } from "../contexts/GameContext.tsx";
 
 import { useState, useEffect } from "react";
+import { motion } from "framer-motion";
 
 import Editor from "@monaco-editor/react";
 import ConsolePanel from "./ConsolePanel.tsx";
 
 import { ChevronUp, ChevronDown } from "lucide-react";
+import { buttonVariants, itemVariants, listItemVariants } from "../utils/animations.ts";
 
 export default function EditorPanel() {
     const { isConnected, send, onMessage } = useSocket();
@@ -78,20 +80,31 @@ export default function EditorPanel() {
 
     return (
         <>
-            <div className="w-[50%] min-w-[450px] max-h-[85vh] rounded-2xl bg-brand-gray border-2 border-gray-700 m-3 flex flex-col flex-1 overflow-hidden">
-                <div className="border-b border-gray-700 px-4 py-3">
+            <motion.div
+                className="flex h-full min-h-0 min-w-[420px] flex-[1.25] flex-col overflow-hidden rounded-3xl border border-white/10 bg-[#101523]/85"
+                variants={itemVariants}
+                initial="hidden"
+                animate="visible"
+                whileHover={{ y: -2 }}
+                transition={{ duration: 0.2 }}
+            >
+                <motion.div className="border-b border-white/10 px-4 py-3" variants={listItemVariants}>
                     <div className="flex items-center justify-between gap-3">
                         <div className="flex items-center gap-2">
                             <div className="w-1 h-5 bg-purple-600 rounded-full" />
                             <h2 className="text-gray-100 text-sm font-bold uppercase tracking-widest">Editor</h2>
                         </div>
-                        <span className={`text-xs font-semibold rounded-full px-2.5 py-1 ${currentPlayer === username ? "bg-green-500/10 text-green-400" : "bg-gray-800 text-gray-400"}`}>
+                        <motion.span
+                            className={`rounded-full px-2.5 py-1 text-xs font-semibold ${currentPlayer === username ? "bg-cyan-500/15 text-cyan-300" : "bg-white/5 text-gray-400"}`}
+                            animate={currentPlayer === username ? { scale: [1, 1.04, 1] } : { scale: 1 }}
+                            transition={{ duration: 1.4, repeat: currentPlayer === username ? Infinity : 0 }}
+                        >
                             {currentPlayer === username ? "Your Turn" : `${currentPlayer}'s Turn`}
-                        </span>
+                        </motion.span>
                     </div>
-                </div>
+                </motion.div>
                 {currentPlayer === username ? (
-                    <div className="flex flex-1 flex-col min-h-0">
+                    <motion.div className="flex flex-1 flex-col min-h-0" variants={listItemVariants}>
                         <div className="min-h-0" style={{ height: `${editorHeight}%` }}>
                             <Editor
                                 height="100%"
@@ -108,31 +121,39 @@ export default function EditorPanel() {
                             isOpen={isConsoleOpen}
                             onResize={handleConsoleResize}
                         />
-                        <div className="flex items-center justify-between border-t border-gray-700 h-16 min-h-16 shrink-0 bg-brand-gray px-3">
-                            <button
+                        <motion.div className="flex h-16 min-h-16 shrink-0 items-center justify-between border-t border-white/10 bg-[#0d1220] px-3" variants={listItemVariants}>
+                            <motion.button
                                 type="button"
-                                className="cursor-pointer text-gray-300 px-3 py-2 rounded-xl text-sm font-semibold hover:bg-gray-800 transition-colors duration-200"
+                                className="cursor-pointer rounded-xl px-3 py-2 text-sm font-semibold text-gray-300 transition-colors duration-200 hover:bg-white/10"
                                 onClick={toggleConsole}
+                                variants={buttonVariants}
+                                whileHover="hover"
+                                whileTap="tap"
                             >
                                 Console {isConsoleOpen ? <ChevronDown className="inline" size={16} /> : <ChevronUp className="inline" size={16} />}
-                            </button>
-                            <button
+                            </motion.button>
+                            <motion.button
                                 type="button"
                                 onClick={runCode}
                                 disabled={isRunning}
-                                className={`px-5 py-2.5 rounded-xl font-bold text-sm text-white transition-all duration-200 ${
+                                className={`rounded-2xl px-5 py-2.5 text-sm font-bold text-white transition-all duration-200 ${
                                     isRunning
-                                        ? "cursor-not-allowed bg-purple-900 opacity-50"
-                                        : "cursor-pointer bg-purple-700 hover:bg-purple-600 active:scale-95"
+                                    ? "cursor-not-allowed bg-cyan-900/60 opacity-50"
+                                    : "cursor-pointer bg-gradient-to-r from-cyan-600 to-purple-600 hover:from-cyan-500 hover:to-purple-500 active:scale-95"
                                 }`}
+                                variants={buttonVariants}
+                                whileHover={!isRunning ? "hover" : undefined}
+                                whileTap={!isRunning ? "tap" : undefined}
+                                animate={isRunning ? { scale: [1, 1.03, 1] } : { scale: 1 }}
+                                transition={{ duration: 0.8, repeat: isRunning ? Infinity : 0 }}
                             >
                                 {isRunning ? "Running..." : "Run"}
-                            </button>
-                        </div>
-                    </div>
+                            </motion.button>
+                        </motion.div>
+                    </motion.div>
                 ) : (
-                    <div className="flex flex-1 flex-col bg-brand-gray min-h-0">
-                        <div className="flex items-center justify-between border-b border-gray-700 px-4 py-2 bg-brand-gray-light/30">
+                    <motion.div className="flex min-h-0 flex-1 flex-col bg-[#101523]" variants={listItemVariants}>
+                        <div className="flex items-center justify-between border-b border-white/10 bg-[#0d1220] px-4 py-2">
                             <p className="text-xs uppercase tracking-widest font-semibold text-gray-500">Live View</p>
                             <p className="text-sm font-semibold text-gray-300">
                                 {currentPlayer} is coding
@@ -151,10 +172,10 @@ export default function EditorPanel() {
                                 }}
                             />
                         </div>
-                        <div className="flex h-16 min-h-16 shrink-0 justify-end border-t border-gray-700 bg-brand-gray" />
-                    </div>
+                        <div className="flex h-16 min-h-16 shrink-0 justify-end border-t border-white/10 bg-[#0d1220]" />
+                    </motion.div>
                 )}
-            </div>
+            </motion.div>
         </>
     );
 }

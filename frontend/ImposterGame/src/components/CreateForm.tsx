@@ -1,7 +1,10 @@
 import { useSocket } from "../contexts/SocketContext.tsx";
+import { AnimatedModal } from "./AnimatedModal.tsx";
 
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { motion } from "framer-motion";
+import { staggerContainerVariants, itemVariants, buttonVariants } from "../utils/animations.ts";
 
 type CreateFormProps = {
   onCancelCreateClick: () => void;
@@ -64,18 +67,18 @@ export default function CreateForm({ onCancelCreateClick }: CreateFormProps) {
 
   return (
     <>
-      <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex justify-center items-center">
-        <form className="bg-brand-gray rounded-2xl border border-gray-700 w-full max-w-xl flex flex-col gap-6 p-7 shadow-xl mx-4" autoComplete="off">
-          <div className="flex flex-col gap-1">
+      <motion.div variants={staggerContainerVariants} initial="hidden" animate="visible">
+        <AnimatedModal title="Create Room" onClose={onCancelCreateClick}>
+          <motion.div className="flex flex-col gap-1" variants={itemVariants}>
             <div className="flex items-center gap-2 mb-1">
               <div className="w-1 h-5 bg-purple-600 rounded-full" />
               <h1 className="text-gray-100 text-lg font-bold">Create Room</h1>
             </div>
             <p className="text-gray-500 text-xs">Set up the room, choose your preferences, and invite the rest of the lobby.</p>
-          </div>
+          </motion.div>
 
-          <div className="flex flex-col gap-5">
-            <div className="flex flex-col gap-2">
+          <motion.div className="flex flex-col gap-5" variants={staggerContainerVariants}>
+            <motion.div className="flex flex-col gap-2" variants={itemVariants}>
               <label htmlFor="username" className="text-gray-400 text-xs uppercase tracking-widest font-semibold">Username</label>
               <input
                 type="text"
@@ -85,10 +88,10 @@ export default function CreateForm({ onCancelCreateClick }: CreateFormProps) {
                 onChange={(e) => setUsername(e.target.value)}
                 className="border border-gray-700 rounded-xl bg-brand-gray-light text-gray-100 placeholder-gray-600 px-4 py-2.5 text-sm outline-none focus:border-purple-600 transition-colors duration-200"
               />
-            </div>
+            </motion.div>
 
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-              <div className="flex flex-col gap-2">
+            <motion.div className="grid grid-cols-1 gap-4 sm:grid-cols-2" variants={staggerContainerVariants}>
+              <motion.div className="flex flex-col gap-2" variants={itemVariants}>
                 <label htmlFor="difficulty" className="text-gray-400 text-xs uppercase tracking-widest font-semibold">Difficulty</label>
                 <select
                   id="difficulty"
@@ -100,9 +103,9 @@ export default function CreateForm({ onCancelCreateClick }: CreateFormProps) {
                   <option value="Medium">Medium</option>
                   <option value="Hard">Hard</option>
                 </select>
-              </div>
+              </motion.div>
 
-              <div className="flex flex-col gap-2">
+              <motion.div className="flex flex-col gap-2" variants={itemVariants}>
                 <label htmlFor="room-capacity" className="text-gray-400 text-xs uppercase tracking-widest font-semibold">Room Capacity</label>
                 <select
                   id="room-capacity"
@@ -116,9 +119,9 @@ export default function CreateForm({ onCancelCreateClick }: CreateFormProps) {
                   <option value={6}>6 Players</option>
                   <option value={7}>7 Players</option>
                 </select>
-              </div>
+              </motion.div>
 
-              <div className="flex flex-col gap-2">
+              <motion.div className="flex flex-col gap-2" variants={itemVariants}>
                 <label htmlFor="coding-time" className="text-gray-400 text-xs uppercase tracking-widest font-semibold">Coding Time</label>
                 <select
                   id="coding-time"
@@ -132,9 +135,9 @@ export default function CreateForm({ onCancelCreateClick }: CreateFormProps) {
                   <option value={6}>6 Minutes</option>
                   <option value={7}>7 Minutes</option>
                 </select>
-              </div>
+              </motion.div>
 
-              <div className="flex flex-col gap-2">
+              <motion.div className="flex flex-col gap-2" variants={itemVariants}>
                 <label htmlFor="voting-time" className="text-gray-400 text-xs uppercase tracking-widest font-semibold">Voting Time</label>
                 <select
                   id="voting-time"
@@ -146,29 +149,35 @@ export default function CreateForm({ onCancelCreateClick }: CreateFormProps) {
                   <option value={2}>2 Minutes</option>
                   <option value={2.5}>2.5 Minutes</option>
                 </select>
-              </div>
-            </div>
-          </div>
+              </motion.div>
+            </motion.div>
+          </motion.div>
 
-          <div className="flex gap-3">
-            <button
+          <motion.div className="flex gap-3" variants={itemVariants}>
+            <motion.button
               type="button"
               onClick={onCancelCreateClick}
-              className="cursor-pointer flex-1 py-2.5 rounded-xl font-bold text-sm text-gray-400 border border-gray-700 hover:border-gray-500 hover:text-gray-200 transition-all duration-200 active:scale-95"
+              className="flex-1 py-2.5 rounded-xl font-bold text-sm text-gray-400 border border-gray-700 hover:border-gray-500 hover:text-gray-200 transition-all duration-200 active:scale-95 cursor-pointer"
+              variants={buttonVariants}
+              whileHover="hover"
+              whileTap="tap"
             >
               Cancel
-            </button>
-            <button
+            </motion.button>
+            <motion.button
               type="button"
               onClick={onCreateClick}
-              className={`cursor-pointer flex-1 py-2.5 rounded-xl font-bold text-sm text-white bg-purple-700 ${canCreate ? "hover:bg-purple-600 active:scale-95" : ""} transition-all duration-200 disabled:opacity-40 disabled:cursor-default`}
+              className={`flex-1 py-2.5 rounded-xl font-bold text-sm text-white bg-purple-700 ${canCreate ? "hover:bg-purple-600 active:scale-95" : ""} transition-all duration-200 disabled:opacity-40 disabled:cursor-default cursor-pointer`}
               disabled={!canCreate}
+              variants={buttonVariants}
+              whileHover={canCreate ? "hover" : undefined}
+              whileTap={canCreate ? "tap" : undefined}
             >
               Create Room
-            </button>
-          </div>
-        </form>
-      </div>
+            </motion.button>
+          </motion.div>
+        </AnimatedModal>
+      </motion.div>
     </>
   );
 }
