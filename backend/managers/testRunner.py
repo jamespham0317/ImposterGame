@@ -6,6 +6,7 @@ import sys
 import textwrap
 import ast
 import requests
+import time
 from pathlib import Path
 
 from dotenv import load_dotenv
@@ -48,6 +49,8 @@ class TestRunner:
             "1", "true", "yes", "on"
         }
         self.api_key = os.getenv("CHEATCODE_ENGINE_API_KEY")
+        self.execution_poll_interval_seconds = float(os.getenv("EXECUTION_POLL_INTERVAL_SECONDS", "0.25"))
+        self.execution_poll_timeout_seconds = float(os.getenv("EXECUTION_POLL_TIMEOUT_SECONDS", "12"))
         self.request_headers = {}
         if self.api_key:
             self.request_headers["X-API-Key"] = self.api_key
@@ -60,17 +63,103 @@ class TestRunner:
             "tests": {'passed': False, 'results': []}
         }
 
+    def _execution_error_result(self, message):
+        return {
+            "returncode": 1,
+            "stdout": "",
+            "stderr": message,
+            "tests": {'passed': False, 'results': []}
+        }
+
+    def _extract_job_id(self, response):
+        if not isinstance(response, dict):
+            return None
+        return response.get("job_id")
+
+    def _is_terminal_execution_response(self, response):
+        if not isinstance(response, dict):
+            return False
+
+        status = (response.get("status") or "").lower()
+        state = (response.get("state") or "").lower()
+        in_progress_statuses = {"queued", "pending", "running", "processing", "in_progress"}
+        terminal_statuses = {"success", "completed", "done", "timeout", "constraint_violation", "error", "failed"}
+        in_progress_states = {"pending", "started"}
+        terminal_states = {"failure", "success"}
+
+        if status in in_progress_statuses:
+            return False
+        if status in terminal_statuses:
+            return True
+        if state in in_progress_states:
+            return False
+        if state in terminal_states:
+            return True
+
+        if response.get("done") is True or response.get("completed") is True:
+            return True
+
+        result_payload = response.get("result")
+        if isinstance(result_payload, dict):
+            result_status = (result_payload.get("status") or "").lower()
+            if result_status in in_progress_statuses:
+                return False
+            return True
+
+        # Backward compatibility with direct final responses.
+        return any(key in response for key in ["returncode", "tests", "passed", "stderr"])
+
+    def _normalize_execution_result(self, response):
+        payload = response.get("result") if isinstance(response.get("result"), dict) else response
+        payload_status = (payload.get("status") or "").lower() if isinstance(payload, dict) else ""
+        response_status = (response.get("status") or "").lower()
+        state = (response.get("state") or "").lower()
+        status = payload_status or response_status
+
+        if state == "failure":
+            return self._execution_error_result(response.get("error") or str(response.get("info") or "Task failed"))
+        if state in {"pending", "started"}:
+            return self._execution_error_result("Test execution is not complete yet")
+
+        if status in {"timeout"}:
+            return self._execution_error_result("Test execution timed out")
+        if status in {"constraint_violation"}:
+            return self._execution_error_result(payload.get("stderr", "Constraint violation"))
+        if status in {"error", "failed"}:
+            return self._execution_error_result(payload.get("error") or payload.get("stderr") or "Unknown error from test execution server")
+
+        if status not in {"", "success", "completed", "done"}:
+            return self._execution_error_result(payload.get("error") or payload.get("stderr") or "Unknown error from test execution server")
+
+        raw_tests = payload.get("tests", []) if isinstance(payload, dict) else []
+        if isinstance(raw_tests, dict):
+            test_results = raw_tests.get("results", [])
+            passed = raw_tests.get("passed", False)
+        else:
+            test_results = raw_tests if isinstance(raw_tests, list) else []
+            passed = payload.get("passed", False)
+
+        result : Results = {
+            "returncode": payload.get("returncode", 0),
+            "stdout": payload.get("stdout", ""),
+            "stderr": payload.get("stderr", ""),
+            "tests": {"passed": bool(passed), "results": test_results}
+        }
+        return result
+
     def run_tests(self, code):
         #check if server is running. if not run locally (for dev, in production this should throw a server error that we can catch and display to the user)
         url = "http://127.0.0.1:8000/status"
         try:
-            response = requests.post(url, timeout=2)
+            response = requests.get(url, headers=self.request_headers, timeout=2)
             print("status route:", response.status_code, response.text)
             response.raise_for_status()
             response = response.json()
-            if response.get("status") == "ok":
+            if response.get("healthy") == True:
                 return self.execute_tests(code)
             else:
+                print("Server status check failed, running tests locally")
+                print(response)
                 if not self.allow_local_execution:
                     return self._local_execution_disabled_result()
                 return self.locally_execute_tests(code)
@@ -111,66 +200,40 @@ class TestRunner:
         except requests.exceptions.HTTPError:
             status_code = response.status_code if response is not None else "unknown"
             response_text = response.text if response is not None else ""
-            return {
-                "returncode": 1,
-                "stdout": "",
-                "stderr": f"Execution server returned HTTP {status_code}: {response_text}",
-                "tests": {'passed': False, 'results': []}
-            }
+            return self._execution_error_result(f"Execution server returned HTTP {status_code}: {response_text}")
         except (requests.exceptions.ConnectionError, requests.exceptions.Timeout) as e:
             print("Remote execution unavailable, running tests locally:", e)
             if not self.allow_local_execution:
                 return self._local_execution_disabled_result()
             return self.locally_execute_tests(code)
         except requests.exceptions.RequestException as e:
-            return {
-                "returncode": 1,
-                "stdout": "",
-                "stderr": f"Execution request failed: {e}",
-                "tests": {'passed': False, 'results': []}
-            }
+            return self._execution_error_result(f"Execution request failed: {e}")
         except ValueError as e:
-            return {
-                "returncode": 1,
-                "stdout": "",
-                "stderr": f"Invalid JSON from test execution server: {e}",
-                "tests": {'passed': False, 'results': []}
-            }
+            return self._execution_error_result(f"Invalid JSON from test execution server: {e}")
 
-        print(response.get("status", "No status in response"))
-        if response.get("status", "") != "success":
-            if response.get("status") == "timeout":
-                result : Results = {
-                    "returncode": 1,
-                    "stdout": "",
-                    "stderr": "Test execution timed out",
-                    "tests": {'passed': False, 'results': []}
-                }
-                return result
-            elif response.get("status") == "constraint_violation":
-                result : Results = {
-                    "returncode": 1,
-                    "stdout": "",
-                    "stderr": response.get("stderr", "Constraint violation"),
-                    "tests": {'passed': False, 'results': []}
-                }
-                return result
+        # New contract: /execute returns a job id, then /result/{job_id} is polled.
+        job_id = self._extract_job_id(response)
+        if job_id:
+            poll_url = f"http://127.0.0.1:8000/result/{job_id}"
+            deadline = time.monotonic() + self.execution_poll_timeout_seconds
+            while True:
+                if time.monotonic() >= deadline:
+                    return self._execution_error_result("Timed out while waiting for test execution job completion")
+                try:
+                    poll_response = requests.get(poll_url, headers=self.request_headers, timeout=8)
+                    poll_response.raise_for_status()
+                    response = poll_response.json()
+                except requests.exceptions.RequestException as e:
+                    return self._execution_error_result(f"Failed to fetch execution job status: {e}")
+                except ValueError as e:
+                    return self._execution_error_result(f"Invalid JSON from test status endpoint: {e}")
 
+                if self._is_terminal_execution_response(response):
+                    break
 
-            result : Results = {
-                "returncode": 1,
-                "stdout": "",
-                "stderr": response.get('error', 'Unknown error from test execution server'),
-                "tests": {'passed': False, 'results': []}
-            }
-            return result
-        result : Results = {
-            "returncode": response.get("returncode"),
-            "stdout": response.get("stdout"),
-            "stderr": response.get("stderr"),
-            "tests": { 'passed': response.get("passed", False), 'results': response.get("tests", []) }
-        }
-        return result
+                time.sleep(max(0.05, self.execution_poll_interval_seconds))
+
+        return self._normalize_execution_result(response)
 
     def locally_execute_tests(self, code): #Should be for dev only, not used in production
         self.code = code

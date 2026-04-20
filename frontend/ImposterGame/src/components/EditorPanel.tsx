@@ -20,8 +20,12 @@ export default function EditorPanel() {
     const [isRunning, setIsRunning] = useState<boolean>(false);
 
     useEffect(() => {
-        const unsub = onMessage("test-results", () => setIsRunning(false));
-        return () => unsub();
+        const unsubTestResults = onMessage("test-results", () => setIsRunning(false));
+        const unsubTestsRunning = onMessage("tests-running", () => setIsRunning(false));
+        return () => {
+            unsubTestResults();
+            unsubTestsRunning();
+        };
     }, [onMessage]);
 
     const handleEditorChange = (code: string | undefined) => {
